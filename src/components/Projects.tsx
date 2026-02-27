@@ -95,13 +95,16 @@ function LivePreview({ project, isActive }: { project: Project; isActive: boolea
   const handleIframeLoad = useCallback(() => {
     const iframe = iframeRef.current
     if (!iframe) return
-    try {
-      const loc = iframe.contentWindow?.location?.href
-      if (!loc || loc === 'about:blank') return
-    } catch {
-      // Cross-origin access error — external site loaded successfully
-    }
-    setIframeLoaded(true)
+    // Delay check so the browser has time to settle after a potential X-Frame-Options block
+    setTimeout(() => {
+      try {
+        const loc = iframe.contentWindow?.location?.href
+        if (!loc || loc === 'about:blank') return
+      } catch {
+        // Cross-origin access error — external site loaded successfully
+      }
+      setIframeLoaded(true)
+    }, 200)
   }, [])
 
   const iframeSrc = project.iframeUrl || project.url
