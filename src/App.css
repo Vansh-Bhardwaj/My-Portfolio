@@ -81,7 +81,7 @@
 
 @keyframes marqueeScroll {
   0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  100% { transform: translateX(-33.333%); }
 }
 
 @keyframes scrollLine {
@@ -366,13 +366,13 @@ button:hover .arrow-icon {
 
 .marquee-inner {
   display: inline-flex;
-  animation: marqueeScroll calc(40s / var(--marquee-speed, 1)) linear infinite;
+  animation: marqueeScroll 40s linear infinite;
   will-change: transform;
 }
 
 .marquee.reverse .marquee-inner {
   animation-direction: reverse;
-  animation-duration: calc(45s / var(--marquee-speed, 1));
+  animation-duration: 45s;
 }
 
 .marquee-content {

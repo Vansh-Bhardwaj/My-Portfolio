@@ -25,38 +25,46 @@ function MarqueeRow({ items }: { items: string[] }) {
 
 export default function Marquee() {
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const animsRef = useRef<Animation[]>([])
   const speedRef = useRef(1)
   const lastScrollY = useRef(0)
   const lastTime = useRef(Date.now())
 
   useEffect(() => {
+    if (wrapperRef.current) {
+      const inners = wrapperRef.current.querySelectorAll('.marquee-inner')
+      const anims: Animation[] = []
+      inners.forEach((el) => {
+        el.getAnimations().forEach((a) => anims.push(a))
+      })
+      animsRef.current = anims
+    }
+
     const handleScroll = () => {
       const now = Date.now()
       const dt = Math.max(now - lastTime.current, 1)
       const dy = Math.abs(window.scrollY - lastScrollY.current)
       const velocity = dy / dt
-      
+
       speedRef.current = 1 + Math.min(velocity * 3, 4)
-      
+
       lastScrollY.current = window.scrollY
       lastTime.current = now
-
-      if (wrapperRef.current) {
-        wrapperRef.current.style.setProperty('--marquee-speed', String(speedRef.current))
-      }
     }
 
-    const decay = () => {
+    const updateRate = () => {
       speedRef.current += (1 - speedRef.current) * 0.05
-      if (wrapperRef.current) {
-        wrapperRef.current.style.setProperty('--marquee-speed', String(speedRef.current))
-      }
-      requestAnimationFrame(decay)
+
+      animsRef.current.forEach((anim) => {
+        anim.playbackRate = speedRef.current
+      })
+
+      requestAnimationFrame(updateRate)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    const raf = requestAnimationFrame(decay)
-    
+    const raf = requestAnimationFrame(updateRate)
+
     return () => {
       window.removeEventListener('scroll', handleScroll)
       cancelAnimationFrame(raf)
@@ -64,7 +72,7 @@ export default function Marquee() {
   }, [])
 
   return (
-    <div className="marquee-wrapper" ref={wrapperRef} style={{ '--marquee-speed': '1' } as React.CSSProperties}>
+    <div className="marquee-wrapper" ref={wrapperRef}>
       <div className="marquee">
         <div className="marquee-inner">
           <MarqueeRow items={roles} />
