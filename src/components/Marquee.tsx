@@ -35,28 +35,31 @@ export default function Marquee() {
       const dt = Math.max(now - lastTime.current, 1)
       const dy = Math.abs(window.scrollY - lastScrollY.current)
       const velocity = dy / dt
-      
+
       speedRef.current = 1 + Math.min(velocity * 3, 4)
-      
+
       lastScrollY.current = window.scrollY
       lastTime.current = now
-
-      if (wrapperRef.current) {
-        wrapperRef.current.style.setProperty('--marquee-speed', String(speedRef.current))
-      }
     }
 
-    const decay = () => {
+    const updateRate = () => {
       speedRef.current += (1 - speedRef.current) * 0.05
+
       if (wrapperRef.current) {
-        wrapperRef.current.style.setProperty('--marquee-speed', String(speedRef.current))
+        const inners = wrapperRef.current.querySelectorAll('.marquee-inner')
+        inners.forEach((el) => {
+          el.getAnimations().forEach((anim) => {
+            anim.playbackRate = speedRef.current
+          })
+        })
       }
-      requestAnimationFrame(decay)
+
+      requestAnimationFrame(updateRate)
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-    const raf = requestAnimationFrame(decay)
-    
+    const raf = requestAnimationFrame(updateRate)
+
     return () => {
       window.removeEventListener('scroll', handleScroll)
       cancelAnimationFrame(raf)
@@ -64,7 +67,7 @@ export default function Marquee() {
   }, [])
 
   return (
-    <div className="marquee-wrapper" ref={wrapperRef} style={{ '--marquee-speed': '1' } as React.CSSProperties}>
+    <div className="marquee-wrapper" ref={wrapperRef}>
       <div className="marquee">
         <div className="marquee-inner">
           <MarqueeRow items={roles} />

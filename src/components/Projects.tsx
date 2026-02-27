@@ -65,7 +65,7 @@ const projects: Project[] = [
     highlights: ['3D Configurator', 'AR Try-on', 'Full-stack', 'Product Visualization'],
     image: '/preview-centuary.webp',
     canIframe: true,
-    iframeUrl: 'https://43.205.153.173',
+    iframeUrl: 'http://43.205.153.173/sofas',
   },
 ]
 
@@ -93,6 +93,14 @@ function LivePreview({ project, isActive }: { project: Project; isActive: boolea
   }, [isActive, canShowIframe, showIframe])
 
   const handleIframeLoad = useCallback(() => {
+    const iframe = iframeRef.current
+    if (!iframe) return
+    try {
+      const loc = iframe.contentWindow?.location?.href
+      if (!loc || loc === 'about:blank') return
+    } catch {
+      // Cross-origin access error — external site loaded successfully
+    }
     setIframeLoaded(true)
   }, [])
 
