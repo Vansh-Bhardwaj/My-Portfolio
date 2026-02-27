@@ -13,22 +13,22 @@ const creativeProjects: CreativeProject[] = [
   {
     title: 'Nimbus: Citadel of Clouds',
     category: 'VR Game',
-    desc: 'VR puzzle-exploration across floating islands with weapon mechanics and enemy AI. Rebuilt the rendering pipeline for a 4\u00D7 framerate boost \u2014 from 30 fps to 120 fps.',
+    desc: 'VR puzzle-exploration with floating islands, weapon mechanics, and enemy AI. Rebuilt the rendering pipeline for a 4\u00D7 framerate gain (30 \u2192 120 fps).',
     tech: ['Unity', 'C#', 'VR', 'Rendering'],
     accent: '#6366F1',
   },
   {
     title: 'Chronicles of Eldoria',
     category: 'Top-Down RPG',
-    desc: 'Solo-built RPG with full inventory system, enemy AI using A* pathfinding, and a branching dialogue engine for non-linear storytelling.',
+    desc: 'Solo-built RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine.',
     tech: ['Unity', 'AI Systems', 'Game Design'],
     accent: '#F43F5E',
   },
   {
     title: 'AR Applications Suite',
     category: 'Augmented Reality',
-    desc: 'AR bowling sim, spatial 3D calculator, and gesture-driven controls built on Vuforia and LightshipAR for mobile platforms.',
-    tech: ['Vuforia', 'LightshipAR', 'Mobile', 'Unity'],
+    desc: 'Collection of AR experiences \u2014 bowling sim, spatial calculator, and gesture-driven controls on Vuforia and LightshipAR.',
+    tech: ['Vuforia', 'LightshipAR', 'Unity'],
     link: {
       url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
       label: 'Watch Showreel',
@@ -38,7 +38,7 @@ const creativeProjects: CreativeProject[] = [
   {
     title: 'Pirate Cannon',
     category: 'Mobile Game',
-    desc: 'Hyper-casual cannon shooting game with a pirate theme. Published on Google Play Store under AllVarity Studio with 100+ downloads.',
+    desc: 'Hyper-casual cannon shooter published on Google Play under AllVarity Studio. 100+ downloads.',
     tech: ['Unity', 'C#', 'Android'],
     link: {
       url: 'https://play.google.com/store/apps/details?id=com.allvarity.piratecannon',
@@ -49,14 +49,14 @@ const creativeProjects: CreativeProject[] = [
   {
     title: '3D Assets & Models',
     category: '3D Modeling',
-    desc: 'Product furniture renders, detailed castle environments, campus scenes, and weapon models for games and marketing materials.',
+    desc: 'Product renders, castle environments, campus scenes, and weapon models for games and marketing.',
     tech: ['Blender', 'Texturing', 'Rendering'],
     accent: '#8B5CF6',
   },
   {
     title: 'VR Temple Experience',
     category: 'Virtual Reality',
-    desc: 'Fully immersive sacred temple with interactive elements, volumetric lighting, and hand-modeled architectural detail in VR.',
+    desc: 'Immersive sacred temple with volumetric lighting, interactive elements, and hand-modeled architectural detail.',
     tech: ['Unity', 'VR', 'Lighting'],
     accent: '#EC4899',
   },
@@ -69,7 +69,7 @@ export default function Creative() {
     <section id="creative" className="section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">Game Development &amp; VR / AR</p>
+          <p className="section-label">Game Dev &amp; VR / AR</p>
           <div className="creative-grid">
             {creativeProjects.map((project) => (
               <div

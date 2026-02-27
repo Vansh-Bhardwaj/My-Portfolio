@@ -33,12 +33,12 @@ export default function Hero() {
         <SplitLine text="Bhardwaj" baseDelay={1.3} className="stroke" />
       </h1>
       <p className="hero-desc animate-in" style={{ animationDelay: '1.8s' }}>
-        Shipping polished web products, immersive games, and interactive
-        experiences. Software Developer at <strong style={{ color: 'var(--accent)' }}>Simapt</strong>.
+        I build products people actually use &mdash; from production web apps
+        and open-source tools to VR experiences and published games.
       </p>
       <div className="hero-cta animate-in" style={{ animationDelay: '2.0s' }}>
         <a href="#work" className="hero-cta-primary" onClick={(e) => go(e, '#work')}>
-          Selected Work
+          View Projects
         </a>
         <a href="#contact" className="hero-cta-secondary" onClick={(e) => go(e, '#contact')}>
           Get in Touch

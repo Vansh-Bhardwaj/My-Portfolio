@@ -2,8 +2,8 @@ import { useInView } from '../hooks/useInView'
 
 const skills = [
   'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js',
-  'Unity', 'C#', 'Python', 'HTML / CSS', 'HLSL / GLSL',
-  'Cloudflare Workers', 'GSAP', 'Blender', 'Vuforia', 'LightshipAR',
+  'Unity', 'C#', 'Python', 'HLSL / GLSL',
+  'Cloudflare Workers', 'GSAP', 'Blender', 'Vuforia',
 ]
 
 export default function About() {
@@ -16,26 +16,27 @@ export default function About() {
           <p className="section-label">About</p>
           <div className="about-grid">
             <div className="about-bio">
-              Software developer and <strong>creative technologist</strong> with
-              a B.Tech in Computer Science (Graphics &amp; Gaming) from <strong>UPES</strong>.
-              I turn ideas into fast, polished digital products &mdash; from
-              immersive VR worlds to production-ready web interfaces. Currently
-              building product-focused software at <strong>Simapt</strong> and
-              co-running <strong>AllVarity Studio</strong>, a mobile game studio.
+              I&rsquo;m a software developer with a background in
+              Computer Science (Graphics &amp; Gaming) from <strong>UPES</strong>.
+              I ship fast &mdash; whether it&rsquo;s a product interface
+              at <strong>Simapt</strong>, a game on the Play Store through
+              {' '}<strong>AllVarity Studio</strong>, or an open-source tool
+              used by hundreds. My work sits at the intersection of
+              engineering, design, and interactive media.
             </div>
             <div className="about-details">
               <div className="about-detail-item">
                 <h4>Currently</h4>
                 <p>Software Developer at Simapt</p>
-                <p>Co-Founder at AllVarity Studio</p>
+                <p>Co-Founder, AllVarity Studio</p>
               </div>
               <div className="about-detail-item">
                 <h4>Education</h4>
-                <p>B.Tech, Computer Science Engineering</p>
-                <p>Graphics &amp; Gaming &mdash; UPES</p>
+                <p>B.Tech, CSE &mdash; Graphics &amp; Gaming</p>
+                <p>UPES, Dehradun</p>
               </div>
               <div className="about-detail-item">
-                <h4>Expertise</h4>
+                <h4>Stack</h4>
                 <div className="skills-list">
                   {skills.map((s) => (
                     <span key={s} className="skill-tag">{s}</span>
@@ -51,7 +52,7 @@ export default function About() {
             </div>
             <div className="about-stat">
               <div className="about-stat-num">4</div>
-              <div className="about-stat-label">Companies Worked With</div>
+              <div className="about-stat-label">Companies</div>
             </div>
             <div className="about-stat">
               <div className="about-stat-num">5</div>

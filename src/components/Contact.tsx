@@ -49,8 +49,8 @@ export default function Contact() {
             Together
           </h2>
           <p className="contact-desc">
-            Available for product builds, creative collaborations,
-            and challenging technical problems.
+            Open to product roles, creative collaborations,
+            and interesting technical challenges.
           </p>
           <div className="contact-links">
             <MagneticLink
