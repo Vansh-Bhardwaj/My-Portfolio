@@ -11,43 +11,60 @@ interface Project {
   tech: string[]
   preview: 'iframe' | 'image'
   image?: string
+  highlights: string[]
+  secondaryImages?: { src: string; label: string }[]
 }
 
 const projects: Project[] = [
   {
     num: '01',
-    title: 'Centuary Sofas',
-    subtitle: 'Simapt \u00D7 Centuary India',
-    desc: 'Responsive product configurator with 3D visualization, enabling customers to customize and explore sofa designs interactively. Built for India\u2019s leading mattress brand.',
+    title: 'AllVarity Studio',
+    subtitle: 'Game Studio',
+    desc: 'Co-founded a mobile game studio building immersive gaming experiences. Built the web presence, published games on Google Play, and lead development across Unity, web, and VR/AR platforms.',
     year: '2025',
-    url: 'https://sofa.centuaryindia.com',
-    role: 'Frontend Developer at Simapt',
-    tech: ['React', 'TypeScript', '3D Web'],
+    url: 'https://allvaritygames.com',
+    role: 'Co-Founder & Lead Developer',
+    tech: ['Next.js', 'Unity', 'Game Dev'],
     preview: 'image',
-    image: '/preview-centuary.webp',
+    image: '/preview-allvarity.webp',
+    highlights: ['Published on Google Play', 'VR/AR Games', 'Pirate Cannon', 'Studio Dashboard'],
+    secondaryImages: [
+      { src: '/preview-allvarity-games.webp', label: 'Games Catalog' },
+    ],
   },
   {
     num: '02',
     title: 'DebridUI',
     subtitle: 'Open Source Project',
-    desc: 'Modern debrid client with built-in playback, continue watching, subtitle support, and media discovery. Edge-deployed on Cloudflare Workers.',
+    desc: 'Performance-focused debrid client with built-in playback, continue watching, subtitle support, and media discovery. Supports Real-Debrid, TorBox, AllDebrid & Premiumize. Edge-deployed on Cloudflare Workers.',
     year: '2025',
     url: 'https://debrid.indevs.in',
     role: 'Creator',
     tech: ['Next.js', 'TypeScript', 'Cloudflare'],
     preview: 'image',
     image: '/preview-debrid.webp',
+    highlights: ['Built-in Player', 'Media Discovery', 'Cross-device Sync', 'Subtitle Support'],
+    secondaryImages: [
+      { src: '/preview-debrid-landing.webp', label: 'Landing Page' },
+      { src: '/preview-debrid-media.webp', label: 'Media Details' },
+    ],
   },
   {
     num: '03',
-    title: 'AllVarity Studio',
-    subtitle: 'Game Studio',
-    desc: 'Co-founded a mobile game studio and built its web presence from the ground up. Creating engaging gaming experiences for players worldwide.',
+    title: 'Centuary Sofas',
+    subtitle: 'Simapt \u00D7 Centuary India',
+    desc: 'Full-featured e-commerce platform with 3D product visualization and interactive configurator. Showcases the Velveteen collection with customizable size, color, and seating options for India\u2019s leading mattress brand.',
     year: '2025',
-    url: 'https://allvaritygames.com',
-    role: 'Co-Founder & Lead Developer',
-    tech: ['Next.js', 'Unity', 'Game Dev'],
-    preview: 'iframe',
+    url: 'https://sofa.centuaryindia.com',
+    role: 'Frontend Developer at Simapt',
+    tech: ['React', 'TypeScript', '3D Web'],
+    preview: 'image',
+    image: '/preview-centuary.webp',
+    highlights: ['3D Visualization', 'Velveteen Collection', 'Product Configurator', 'E-commerce'],
+    secondaryImages: [
+      { src: '/preview-centuary-velveteen.webp', label: 'Velveteen Product' },
+      { src: '/preview-centuary-configurator.webp', label: '3D Configurator' },
+    ],
   },
 ]
 
@@ -104,6 +121,19 @@ function BrowserMockup({ project }: { project: Project }) {
   )
 }
 
+function SecondaryPreviews({ images }: { images: { src: string; label: string }[] }) {
+  return (
+    <div className="secondary-previews">
+      {images.map((img) => (
+        <div key={img.label} className="secondary-preview-item">
+          <img src={img.src} alt={img.label} className="secondary-preview-img" />
+          <span className="secondary-preview-label">{img.label}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Projects() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
@@ -150,12 +180,20 @@ export default function Projects() {
             >
               <div className="project-preview">
                 <BrowserMockup project={project} />
+                {project.secondaryImages && project.secondaryImages.length > 0 && (
+                  <SecondaryPreviews images={project.secondaryImages} />
+                )}
               </div>
               <div className="project-details">
                 <span className="project-slide-num">{project.num}</span>
                 <h3 className="project-slide-title">{project.title}</h3>
                 <p className="project-slide-subtitle">{project.subtitle}</p>
                 <p className="project-slide-desc">{project.desc}</p>
+                <div className="project-highlights">
+                  {project.highlights.map((h) => (
+                    <span key={h} className="highlight-tag">{h}</span>
+                  ))}
+                </div>
                 <div className="project-slide-info">
                   <div>
                     <span className="info-label">Role</span>

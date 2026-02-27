@@ -418,7 +418,11 @@
 .project-preview {
   height: 100%;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .browser-frame {
@@ -639,6 +643,64 @@
 .info-value {
   font-size: 0.8125rem;
   font-weight: 500;
+}
+
+/* Feature Highlights */
+
+.project-highlights {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.highlight-tag {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 4px 10px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+
+/* Secondary Previews */
+
+.secondary-previews {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.secondary-preview-item {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+.secondary-preview-item:hover {
+  border-color: var(--accent);
+}
+
+.secondary-preview-img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: top left;
+  display: block;
+}
+
+.secondary-preview-label {
+  display: block;
+  padding: 4px 8px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  text-align: center;
+  border-top: 1px solid var(--border);
 }
 
 /* Visit Button */
@@ -867,6 +929,10 @@
 
   .project-preview {
     max-height: 35vh;
+  }
+
+  .secondary-previews {
+    display: none;
   }
 
   .browser-frame {
