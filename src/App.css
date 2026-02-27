@@ -1,3 +1,36 @@
+/* ===== Custom Cursor ===== */
+
+.custom-cursor {
+  position: fixed;
+  top: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: difference;
+  will-change: transform;
+}
+
+@media (hover: none) {
+  .custom-cursor { display: none; }
+}
+
+/* ===== Noise Overlay ===== */
+
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
 /* ===== Page Loader ===== */
 
 .page-loader {
@@ -81,6 +114,19 @@
 @keyframes livePulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+/* ===== Arrow Icon ===== */
+
+.arrow-icon {
+  display: inline-block;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
+}
+
+a:hover .arrow-icon,
+button:hover .arrow-icon {
+  transform: translate(2px, -2px);
 }
 
 /* ===== Animation Classes ===== */
@@ -207,6 +253,8 @@
   line-height: 0.88;
   letter-spacing: -0.04em;
   text-transform: uppercase;
+  will-change: transform, opacity, letter-spacing;
+  transition: letter-spacing 0.1s ease-out;
 }
 
 .hero-name .split-line {
@@ -336,12 +384,13 @@
 
 .marquee-inner {
   display: inline-flex;
-  animation: marqueeScroll 30s linear infinite;
+  animation: marqueeScroll calc(40s / var(--marquee-speed, 1)) linear infinite;
+  will-change: transform;
 }
 
 .marquee.reverse .marquee-inner {
   animation-direction: reverse;
-  animation-duration: 35s;
+  animation-duration: calc(45s / var(--marquee-speed, 1));
 }
 
 .marquee-content {
@@ -411,34 +460,29 @@
   line-height: 1.6;
 }
 
-.about-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+/* About Manifesto */
+
+.about-manifesto {
   margin-top: 48px;
   padding-top: 48px;
   border-top: 1px solid var(--border);
+  font-size: clamp(1.25rem, 2.5vw, 2rem);
+  font-weight: 600;
+  line-height: 1.5;
+  letter-spacing: -0.02em;
 }
 
-.about-stat {
-  text-align: center;
+.manifesto-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.about-stat-num {
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 700;
-  line-height: 1;
-  color: var(--accent);
-  letter-spacing: -0.03em;
-  margin-bottom: 8px;
-}
-
-.about-stat-label {
-  font-size: 0.6875rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--text-muted);
+.about-manifesto.visible .manifesto-word {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .skills-list {
@@ -634,17 +678,11 @@
   color: var(--text);
 }
 
-.browser-overlay-arrow {
-  font-size: 1.125rem;
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
 .browser-viewport:hover .browser-overlay {
   opacity: 1;
 }
 
-.browser-viewport:hover .browser-overlay-arrow {
+.browser-viewport:hover .arrow-icon {
   transform: translate(3px, -3px);
 }
 
@@ -753,15 +791,6 @@
   transform: translateY(-1px);
 }
 
-.project-visit-btn span {
-  font-size: 1rem;
-  transition: transform 0.3s ease;
-}
-
-.project-visit-btn:hover span {
-  transform: translate(2px, -2px);
-}
-
 /* Progress Bar */
 
 .projects-progress-track {
@@ -857,16 +886,6 @@
 
 .creative-card-link:hover {
   opacity: 0.75;
-}
-
-.creative-card-link span {
-  font-size: 0.875rem;
-  display: inline-block;
-  transition: transform 0.3s ease;
-}
-
-.creative-card-link:hover span {
-  transform: translate(2px, -2px);
 }
 
 /* ===== Contact ===== */
@@ -1010,11 +1029,6 @@
     grid-template-columns: 1fr;
   }
 
-  .about-stats {
-    margin-top: 32px;
-    padding-top: 32px;
-  }
-
   .project-slide {
     grid-template-columns: 1fr;
     gap: 16px;
@@ -1085,18 +1099,6 @@
     font-size: 1rem;
   }
 
-  .about-stats {
-    gap: 16px;
-  }
-
-  .about-stat-num {
-    font-size: 1.75rem;
-  }
-
-  .about-stat-label {
-    font-size: 0.5625rem;
-  }
-
   .project-slide-title {
     font-size: 1.5rem;
   }
@@ -1143,20 +1145,4 @@
     font-size: 2.5rem;
   }
 
-  .about-stats {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .about-stat {
-    text-align: left;
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-  }
-
-  .about-stat-num {
-    font-size: 1.5rem;
-    margin-bottom: 0;
-  }
 }
