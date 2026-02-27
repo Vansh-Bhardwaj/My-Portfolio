@@ -474,6 +474,7 @@ button:hover .arrow-icon {
 
 .manifesto-word {
   display: inline-block;
+  margin-right: 0.3em;
   opacity: 0;
   transform: translateY(12px);
   transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
