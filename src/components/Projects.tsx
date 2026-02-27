@@ -16,11 +16,13 @@ interface Project {
   iframeUrl?: string
 }
 
+const MOBILE_BREAKPOINT = 768
+
 function isMobileOrIOS(): boolean {
   if (typeof navigator === 'undefined') return false
   const ua = navigator.userAgent
   const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  const isMobile = /Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < 768
+  const isMobile = /Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < MOBILE_BREAKPOINT
   return isIOS || isMobile
 }
 
@@ -63,7 +65,7 @@ const projects: Project[] = [
     highlights: ['3D Configurator', 'AR Try-on', 'Full-stack', 'Product Visualization'],
     image: '/preview-centuary.webp',
     canIframe: true,
-    iframeUrl: 'http://43.205.153.173',
+    iframeUrl: 'https://43.205.153.173',
   },
 ]
 

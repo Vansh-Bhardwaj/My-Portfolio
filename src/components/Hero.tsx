@@ -20,6 +20,8 @@ export default function Hero() {
   const nameRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
+    const SCROLL_RANGE = 0.6
+    const LERP_FACTOR = 0.08
     let current = 0
     let target = 0
     let rafId = 0
@@ -28,11 +30,11 @@ export default function Hero() {
 
     const updateTarget = () => {
       const vh = window.innerHeight
-      target = Math.min(Math.max(window.scrollY / (vh * 0.6), 0), 1)
+      target = Math.min(Math.max(window.scrollY / (vh * SCROLL_RANGE), 0), 1)
     }
 
     const animate = () => {
-      current = lerp(current, target, 0.08)
+      current = lerp(current, target, LERP_FACTOR)
 
       if (Math.abs(current - target) < 0.0001) current = target
 
