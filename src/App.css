@@ -972,21 +972,26 @@
 /* ===== Responsive — Small Tablet (768px) ===== */
 
 @media (max-width: 768px) {
+  .navbar {
+    mix-blend-mode: normal;
+  }
+
   .nav-links {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--bg);
+    background: rgba(12, 12, 12, 0.97);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 32px;
+    gap: 40px;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
-    mix-blend-mode: normal;
     z-index: 105;
   }
 
@@ -998,6 +1003,7 @@
   .nav-links a {
     font-size: 1.5rem;
     font-weight: 700;
+    letter-spacing: 0.1em;
   }
 
   .nav-toggle {
