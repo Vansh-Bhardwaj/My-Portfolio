@@ -48,7 +48,7 @@ function App() {
       <footer className="footer">
         <div className="container footer-inner">
           <span>&copy; {new Date().getFullYear()} Vansh Bhardwaj</span>
-          <span>Built with passion</span>
+          <span>Built with craft</span>
         </div>
       </footer>
     </>

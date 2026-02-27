@@ -48,7 +48,17 @@ export default function Contact() {
             <span className="accent">Work</span><br />
             Together
           </h2>
+          <p className="contact-desc">
+            Available for product builds, creative collaborations,
+            and challenging technical problems.
+          </p>
           <div className="contact-links">
+            <MagneticLink
+              href="mailto:work.vanshbhardwaj@gmail.com"
+              className="contact-link"
+            >
+              Email
+            </MagneticLink>
             <MagneticLink
               href="https://github.com/Vansh-Bhardwaj"
               target="_blank"
@@ -66,10 +76,12 @@ export default function Contact() {
               LinkedIn
             </MagneticLink>
             <MagneticLink
-              href="mailto:hello@vanshbhardwaj.dev"
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
               className="contact-link"
             >
-              Email
+              Twitter
             </MagneticLink>
           </div>
         </div>

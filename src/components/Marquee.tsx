@@ -1,5 +1,12 @@
-const roles = ['Developer', 'Game Designer', 'Co-Founder', 'Creative Technologist', 'Web Developer', 'VR / AR']
-const tech = ['React', 'Next.js', 'Unity', 'TypeScript', 'C#', 'Cloudflare', 'Blender', 'Three.js']
+const roles = [
+  'Software Developer', 'Creative Technologist', 'Co-Founder',
+  'Game Developer', 'VR / AR', '3D Visualization',
+  'Product UI', 'Frontend Systems',
+]
+const tech = [
+  'React', 'Next.js', 'TypeScript', 'Unity', 'C#',
+  'Cloudflare Workers', 'Blender', 'GSAP', 'Node.js', 'GLSL',
+]
 
 function MarqueeRow({ items }: { items: string[] }) {
   return (

@@ -20,6 +20,8 @@
 
 html {
   /* no scroll-behavior: smooth — Lenis handles this */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--bg);
 }
 
 body {
@@ -30,6 +32,24 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.6;
+}
+
+/* Custom Scrollbar — WebKit */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff6a2e;
 }
 
 a {

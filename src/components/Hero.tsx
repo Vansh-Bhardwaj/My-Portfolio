@@ -15,19 +15,35 @@ function SplitLine({ text, baseDelay, className = '' }: { text: string; baseDela
 }
 
 export default function Hero() {
+  const go = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+    e.preventDefault()
+    const el = document.querySelector(target)
+    if (el) {
+      window.scrollTo({ top: (el as HTMLElement).offsetTop })
+    }
+  }
+
   return (
     <section className="hero">
       <p className="hero-label animate-in" style={{ animationDelay: '0.8s' }}>
-        Creative Developer &amp; Co-Founder
+        Software Developer &amp; Creative Technologist
       </p>
       <h1 className="hero-name">
         <SplitLine text="Vansh" baseDelay={1.0} />
         <SplitLine text="Bhardwaj" baseDelay={1.3} className="stroke" />
       </h1>
       <p className="hero-desc animate-in" style={{ animationDelay: '1.8s' }}>
-        Building immersive digital experiences &mdash; from VR worlds
-        and mobile games to modern web applications.
+        Shipping polished web products, immersive games, and interactive
+        experiences. Software Developer at <strong style={{ color: 'var(--accent)' }}>Simapt</strong>.
       </p>
+      <div className="hero-cta animate-in" style={{ animationDelay: '2.0s' }}>
+        <a href="#work" className="hero-cta-primary" onClick={(e) => go(e, '#work')}>
+          Selected Work
+        </a>
+        <a href="#contact" className="hero-cta-secondary" onClick={(e) => go(e, '#contact')}>
+          Get in Touch
+        </a>
+      </div>
       <span className="hero-scroll animate-in" style={{ animationDelay: '2.2s' }}>Scroll</span>
     </section>
   )

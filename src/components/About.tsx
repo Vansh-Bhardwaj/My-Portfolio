@@ -2,9 +2,8 @@ import { useInView } from '../hooks/useInView'
 
 const skills = [
   'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js',
-  'Unity', 'C#', 'C++', 'Python',
-  'VR/AR', 'ShaderLab', 'GLSL',
-  'Blender', 'Three.js',
+  'Unity', 'C#', 'Python', 'HTML / CSS', 'HLSL / GLSL',
+  'Cloudflare Workers', 'GSAP', 'Blender', 'Vuforia', 'LightshipAR',
 ]
 
 export default function About() {
@@ -17,18 +16,23 @@ export default function About() {
           <p className="section-label">About</p>
           <div className="about-grid">
             <div className="about-bio">
-              I&rsquo;m a <strong>creative developer</strong> and co-founder based in India.
-              Currently building web experiences at <strong>Simapt</strong> and
+              Software developer and <strong>creative technologist</strong> with
+              a B.Tech in Computer Science (Graphics &amp; Gaming) from <strong>UPES</strong>.
+              I turn ideas into fast, polished digital products &mdash; from
+              immersive VR worlds to production-ready web interfaces. Currently
+              building product-focused software at <strong>Simapt</strong> and
               co-running <strong>AllVarity Studio</strong>, a mobile game studio.
-              My work spans web development, game development, VR/AR, and creative
-              technology &mdash; always focused on crafting immersive digital experiences
-              that push boundaries.
             </div>
             <div className="about-details">
               <div className="about-detail-item">
                 <h4>Currently</h4>
-                <p>Frontend Developer at Simapt</p>
+                <p>Software Developer at Simapt</p>
                 <p>Co-Founder at AllVarity Studio</p>
+              </div>
+              <div className="about-detail-item">
+                <h4>Education</h4>
+                <p>B.Tech, Computer Science Engineering</p>
+                <p>Graphics &amp; Gaming &mdash; UPES</p>
               </div>
               <div className="about-detail-item">
                 <h4>Expertise</h4>
@@ -38,6 +42,20 @@ export default function About() {
                   ))}
                 </div>
               </div>
+            </div>
+          </div>
+          <div className="about-stats">
+            <div className="about-stat">
+              <div className="about-stat-num">12</div>
+              <div className="about-stat-label">Products Shipped</div>
+            </div>
+            <div className="about-stat">
+              <div className="about-stat-num">4</div>
+              <div className="about-stat-label">Companies Worked With</div>
+            </div>
+            <div className="about-stat">
+              <div className="about-stat-num">5</div>
+              <div className="about-stat-label">Disciplines</div>
             </div>
           </div>
         </div>

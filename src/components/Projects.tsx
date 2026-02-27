@@ -9,62 +9,54 @@ interface Project {
   url: string
   role: string
   tech: string[]
-  preview: 'iframe' | 'image'
-  image?: string
   highlights: string[]
-  secondaryImages?: { src: string; label: string }[]
+  icon: string
+  gradient: string
+  decoColor: string
 }
 
 const projects: Project[] = [
   {
     num: '01',
     title: 'AllVarity Studio',
-    subtitle: 'Game Studio',
-    desc: 'Co-founded a mobile game studio building immersive gaming experiences. Built the web presence, published games on Google Play, and lead development across Unity, web, and VR/AR platforms.',
-    year: '2025',
+    subtitle: 'Game Studio \u00B7 Brand Site',
+    desc: 'Co-founded a mobile game studio building immersive gaming experiences. Built the web presence from scratch, published games on Google Play, and lead development across Unity, web, and VR/AR platforms.',
+    year: '2024 \u2013 Present',
     url: 'https://allvaritygames.com',
     role: 'Co-Founder & Lead Developer',
-    tech: ['Next.js', 'Unity', 'Game Dev'],
-    preview: 'image',
-    image: '/preview-allvarity.webp',
+    tech: ['Next.js', 'Unity', 'Game Dev', 'VR/AR'],
     highlights: ['Published on Google Play', 'VR/AR Games', 'Pirate Cannon', 'Studio Dashboard'],
-    secondaryImages: [
-      { src: '/preview-allvarity-games.webp', label: 'Games Catalog' },
-    ],
+    icon: '\uD83C\uDFAE',
+    gradient: 'linear-gradient(135deg, #6366F1, #8B5CF6, #A78BFA)',
+    decoColor: '#6366F1',
   },
   {
     num: '02',
     title: 'DebridUI',
-    subtitle: 'Open Source Project',
-    desc: 'Performance-focused debrid client with built-in playback, continue watching, subtitle support, and media discovery. Supports Real-Debrid, TorBox, AllDebrid & Premiumize. Edge-deployed on Cloudflare Workers.',
-    year: '2025',
-    url: 'https://debrid.indevs.in',
-    role: 'Creator',
-    tech: ['Next.js', 'TypeScript', 'Cloudflare'],
-    preview: 'image',
-    image: '/preview-debrid.webp',
-    highlights: ['Built-in Player', 'Media Discovery', 'Cross-device Sync', 'Subtitle Support'],
-    secondaryImages: [
-      { src: '/preview-debrid-landing.webp', label: 'Landing Page' },
-      { src: '/preview-debrid-media.webp', label: 'Media Details' },
-    ],
+    subtitle: 'Open Source \u00B7 TypeScript \u00B7 Cloudflare Workers',
+    desc: 'Fast, modern debrid client with built-in playback, continue watching, subtitle support, and media discovery. Supports Real-Debrid, TorBox, AllDebrid & Premiumize. Privacy-first \u2014 user data never leaves the browser.',
+    year: '2025 \u2013 Present',
+    url: 'https://debridui.vercel.app',
+    role: 'Creator & Active Maintainer',
+    tech: ['Next.js', 'TypeScript', 'Cloudflare Workers'],
+    highlights: ['Built-in Player', 'Multi-provider', 'Cross-device Sync', 'Open Source'],
+    icon: '\u26A1',
+    gradient: 'linear-gradient(135deg, #10B981, #059669, #34D399)',
+    decoColor: '#10B981',
   },
   {
     num: '03',
     title: 'Centuary Sofas',
     subtitle: 'Simapt \u00D7 Centuary India',
-    desc: 'Full-featured e-commerce platform with 3D product visualization and interactive configurator. Showcases the Velveteen collection with customizable size, color, and seating options for India\u2019s leading mattress brand.',
+    desc: 'Full-featured e-commerce platform for India\u2019s leading mattress brand. Features interactive 3D product visualization with AR try-on, real-time configurator for size, color, and seating options across the Velveteen collection.',
     year: '2025',
     url: 'https://sofa.centuaryindia.com',
     role: 'Frontend Developer at Simapt',
-    tech: ['React', 'TypeScript', '3D Web'],
-    preview: 'image',
-    image: '/preview-centuary.webp',
-    highlights: ['3D Visualization', 'Velveteen Collection', 'Product Configurator', 'E-commerce'],
-    secondaryImages: [
-      { src: '/preview-centuary-velveteen.webp', label: 'Velveteen Product' },
-      { src: '/preview-centuary-configurator.webp', label: '3D Configurator' },
-    ],
+    tech: ['React', 'TypeScript', '3D / AR', 'E-commerce'],
+    highlights: ['3D Visualization', 'Augmented Reality', 'Product Configurator', 'Velveteen Collection'],
+    icon: '\uD83D\uDECB\uFE0F',
+    gradient: 'linear-gradient(135deg, #F59E0B, #D97706, #FBBF24)',
+    decoColor: '#F59E0B',
   },
 ]
 
@@ -76,60 +68,27 @@ function getHostname(url: string): string {
   }
 }
 
-function BrowserMockup({ project }: { project: Project }) {
-  const [iframeLoaded, setIframeLoaded] = useState(false)
-
+function ProjectVisual({ project }: { project: Project }) {
   return (
-    <div className="browser-frame">
-      <div className="browser-bar">
-        <div className="browser-dots">
-          <span /><span /><span />
-        </div>
-        <div className="browser-url">{getHostname(project.url)}</div>
+    <div className="project-visual">
+      <div className="project-visual-bg" style={{ background: project.gradient }} />
+      <div className="project-visual-deco" style={{ background: project.decoColor, opacity: 0.15 }} />
+      <div className="project-visual-deco" style={{ background: project.decoColor, opacity: 0.1 }} />
+      <span className="project-visual-num">{project.num}</span>
+      <div className="project-visual-content">
+        <span className="project-visual-icon">{project.icon}</span>
+        <div className="project-visual-name">{project.title}</div>
+        <div className="project-visual-type">{project.subtitle}</div>
+        <a
+          href={project.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="project-visual-url"
+        >
+          <span className="project-visual-url-dot" />
+          {getHostname(project.url)}
+        </a>
       </div>
-      <a
-        href={project.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="browser-viewport"
-      >
-        {project.preview === 'iframe' ? (
-          <>
-            <iframe
-              src={project.url}
-              title={`${project.title} preview`}
-              className={`browser-iframe ${iframeLoaded ? 'loaded' : ''}`}
-              loading="lazy"
-              sandbox="allow-scripts allow-same-origin"
-              onLoad={() => setIframeLoaded(true)}
-            />
-            {!iframeLoaded && <div className="browser-loading">Loading&hellip;</div>}
-          </>
-        ) : (
-          <img
-            src={project.image}
-            alt={`${project.title} preview`}
-            className="browser-screenshot"
-          />
-        )}
-        <div className="browser-overlay">
-          <span>Visit Live Site</span>
-          <span className="browser-overlay-arrow">&#8599;</span>
-        </div>
-      </a>
-    </div>
-  )
-}
-
-function SecondaryPreviews({ images }: { images: { src: string; label: string }[] }) {
-  return (
-    <div className="secondary-previews">
-      {images.map((img) => (
-        <div key={img.label} className="secondary-preview-item">
-          <img src={img.src} alt={img.label} className="secondary-preview-img" />
-          <span className="secondary-preview-label">{img.label}</span>
-        </div>
-      ))}
     </div>
   )
 }
@@ -178,12 +137,7 @@ export default function Projects() {
               key={project.num}
               className={`project-slide ${i === activeIndex ? 'active' : ''}`}
             >
-              <div className="project-preview">
-                <BrowserMockup project={project} />
-                {project.secondaryImages && project.secondaryImages.length > 0 && (
-                  <SecondaryPreviews images={project.secondaryImages} />
-                )}
-              </div>
+              <ProjectVisual project={project} />
               <div className="project-details">
                 <span className="project-slide-num">{project.num}</span>
                 <h3 className="project-slide-title">{project.title}</h3>
