@@ -1,4 +1,39 @@
+import { useRef } from 'react'
 import { useInView } from '../hooks/useInView'
+
+function MagneticLink({ href, children, className = '', ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
+  const linkRef = useRef<HTMLAnchorElement>(null)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const el = linkRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = e.clientX - rect.left - rect.width / 2
+    const y = e.clientY - rect.top - rect.height / 2
+    el.style.setProperty('--mx', `${x * 0.3}px`)
+    el.style.setProperty('--my', `${y * 0.3}px`)
+  }
+
+  const handleMouseLeave = () => {
+    const el = linkRef.current
+    if (!el) return
+    el.style.setProperty('--mx', '0px')
+    el.style.setProperty('--my', '0px')
+  }
+
+  return (
+    <a
+      {...props}
+      ref={linkRef}
+      href={href}
+      className={`magnetic ${className}`}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      {children}
+    </a>
+  )
+}
 
 export default function Contact() {
   const { ref, isVisible } = useInView()
@@ -14,28 +49,28 @@ export default function Contact() {
             Together
           </h2>
           <div className="contact-links">
-            <a
+            <MagneticLink
               href="https://github.com/Vansh-Bhardwaj"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-link"
             >
               GitHub
-            </a>
-            <a
+            </MagneticLink>
+            <MagneticLink
               href="https://www.linkedin.com/in/vansh-bhardwaj-780271221/"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-link"
             >
               LinkedIn
-            </a>
-            <a
+            </MagneticLink>
+            <MagneticLink
               href="mailto:hello@vanshbhardwaj.dev"
               className="contact-link"
             >
               Email
-            </a>
+            </MagneticLink>
           </div>
         </div>
       </div>

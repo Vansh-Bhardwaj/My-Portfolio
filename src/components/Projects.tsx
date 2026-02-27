@@ -1,117 +1,181 @@
-import { useInView } from '../hooks/useInView'
+import { useEffect, useRef, useState } from 'react'
 
 interface Project {
   num: string
   title: string
+  subtitle: string
   desc: string
-  category: string
   year: string
-  url: string | null
+  url: string
+  role: string
+  tech: string[]
+  color: string
 }
 
 const projects: Project[] = [
   {
     num: '01',
     title: 'Centuary Sofas',
-    desc: 'Product configurator for India\u2019s leading mattress brand',
-    category: 'Web Dev',
+    subtitle: 'Simapt \u00D7 Centuary India',
+    desc: 'Responsive product configurator enabling customers to customize and visualize sofa designs in real-time. Built for India\u2019s leading mattress brand.',
     year: '2025',
     url: 'https://sofa.centuaryindia.com',
+    role: 'Frontend Developer at Simapt',
+    tech: ['React', 'TypeScript', 'Web'],
+    color: '#C4A882',
   },
   {
     num: '02',
     title: 'DebridUI',
-    desc: 'Modern debrid client with media streaming & discovery',
-    category: 'Web App',
+    subtitle: 'Open Source Project',
+    desc: 'Modern debrid client with built-in playback, continue watching, subtitle support, and media discovery. Edge-deployed on Cloudflare Workers.',
     year: '2025',
     url: 'https://debrid.indevs.in',
+    role: 'Creator',
+    tech: ['Next.js', 'TypeScript', 'Cloudflare'],
+    color: '#6366F1',
   },
   {
     num: '03',
     title: 'AllVarity Studio',
-    desc: 'Mobile game studio \u2014 building engaging experiences',
-    category: 'Game Dev',
+    subtitle: 'Game Studio',
+    desc: 'Co-founded a mobile game studio and built its web presence from the ground up. Creating engaging gaming experiences for players worldwide.',
     year: '2025',
     url: 'https://allvaritygames.com',
-  },
-  {
-    num: '04',
-    title: 'Nimbus',
-    desc: 'VR puzzle-exploration game with 300% framerate optimization',
-    category: 'VR / Unity',
-    year: '2024',
-    url: null,
-  },
-  {
-    num: '05',
-    title: 'Fluid Simulation',
-    desc: 'Real-time physics-based fluid dynamics in C++',
-    category: 'Graphics',
-    year: '2024',
-    url: 'https://github.com/Vansh-Bhardwaj/FluidSimulation',
-  },
-  {
-    num: '06',
-    title: 'Multiplayer Tetris',
-    desc: 'Real-time online multiplayer Tetris',
-    category: 'Game Dev',
-    year: '2024',
-    url: 'https://github.com/Vansh-Bhardwaj/MultiplayerTetris',
+    role: 'Co-Founder & Lead Developer',
+    tech: ['Next.js', 'Unity', 'Game Dev'],
+    color: '#10B981',
   },
 ]
 
-function ProjectRow({ project, index }: { project: Project; index: number }) {
-  const content = (
-    <>
-      <span className="project-num">{project.num}</span>
-      <div className="project-info">
-        <div className="project-title">{project.title}</div>
-        <p className="project-desc">{project.desc}</p>
+function getHostname(url: string): string {
+  try {
+    return new URL(url).hostname
+  } catch {
+    return url
+  }
+}
+
+function BrowserMockup({ url, color }: { url: string; color: string }) {
+  return (
+    <div className="browser-frame">
+      <div className="browser-bar">
+        <div className="browser-dots">
+          <span /><span /><span />
+        </div>
+        <div className="browser-url">{getHostname(url)}</div>
       </div>
-      <span className="project-meta">{project.category}</span>
-      <span className="project-meta">
-        {project.year}
-        {project.url && <span className="project-arrow"> &#8599;</span>}
-      </span>
-    </>
-  )
-
-  const style = { transitionDelay: `${index * 0.05}s` }
-
-  if (project.url) {
-    return (
       <a
-        href={project.url}
+        href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="project-item"
-        style={style}
+        className="browser-viewport"
       >
-        {content}
+        <div className="browser-preview" style={{ '--pc': color } as React.CSSProperties}>
+          <div className="preview-skeleton">
+            <div className="preview-sk-nav">
+              <span style={{ width: '48px' }} />
+              <div className="preview-sk-links">
+                <span style={{ width: '24px' }} />
+                <span style={{ width: '24px' }} />
+                <span style={{ width: '24px' }} />
+              </div>
+            </div>
+            <div className="preview-sk-hero">
+              <span style={{ width: '65%', height: '16px' }} />
+              <span style={{ width: '40%', height: '10px' }} />
+              <span style={{ width: '80px', height: '28px', borderRadius: '4px' }} />
+            </div>
+            <div className="preview-sk-grid">
+              <span /><span /><span />
+            </div>
+          </div>
+        </div>
+        <div className="browser-overlay">
+          <span>Visit Site</span>
+          <span className="browser-overlay-arrow">&#8599;</span>
+        </div>
       </a>
-    )
-  }
-
-  return (
-    <div className="project-item" style={style}>
-      {content}
     </div>
   )
 }
 
 export default function Projects() {
-  const { ref, isVisible } = useInView()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const el = containerRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      const totalScroll = rect.height - window.innerHeight
+      if (totalScroll <= 0) return
+
+      const scrolled = -rect.top
+      const progress = Math.max(0, Math.min(0.999, scrolled / totalScroll))
+      const index = Math.floor(progress * projects.length)
+      setActiveIndex(Math.max(0, Math.min(index, projects.length - 1)))
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
-    <section id="work" className="section">
-      <div className="container">
-        <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
+    <section
+      id="work"
+      ref={containerRef}
+      className="projects-section"
+      style={{ height: `${projects.length * 100}vh` }}
+    >
+      <div className="projects-sticky">
+        <div className="projects-header">
           <p className="section-label">Selected Work</p>
-          <div className="projects-list">
-            {projects.map((p, i) => (
-              <ProjectRow key={p.num} project={p} index={i} />
-            ))}
-          </div>
+          <span className="projects-counter">
+            {String(activeIndex + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
+          </span>
+        </div>
+
+        <div className="projects-content">
+          {projects.map((project, i) => (
+            <div
+              key={project.num}
+              className={`project-slide ${i === activeIndex ? 'active' : ''}`}
+            >
+              <div className="project-preview">
+                <BrowserMockup url={project.url} color={project.color} />
+              </div>
+              <div className="project-details">
+                <span className="project-slide-num">{project.num}</span>
+                <h3 className="project-slide-title">{project.title}</h3>
+                <p className="project-slide-subtitle">{project.subtitle}</p>
+                <p className="project-slide-desc">{project.desc}</p>
+                <div className="project-slide-info">
+                  <div>
+                    <span className="info-label">Role</span>
+                    <span className="info-value">{project.role}</span>
+                  </div>
+                  <div>
+                    <span className="info-label">Stack</span>
+                    <span className="info-value">{project.tech.join(' \u00B7 ')}</span>
+                  </div>
+                  <div>
+                    <span className="info-label">Year</span>
+                    <span className="info-value">{project.year}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="projects-progress-track">
+          <div
+            className="projects-progress-fill"
+            style={{ transform: `scaleX(${(activeIndex + 1) / projects.length})` }}
+          />
         </div>
       </div>
     </section>
