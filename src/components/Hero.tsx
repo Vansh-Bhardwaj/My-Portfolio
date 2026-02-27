@@ -20,20 +20,40 @@ export default function Hero() {
   const nameRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
-    const handleScroll = () => {
-      const el = nameRef.current
-      if (!el) return
-      const scrollY = window.scrollY
+    let current = 0
+    let target = 0
+    let rafId = 0
+
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t
+
+    const updateTarget = () => {
       const vh = window.innerHeight
-      const progress = Math.min(scrollY / (vh * 0.6), 1)
-      
-      el.style.letterSpacing = `${-0.04 + progress * 0.15}em`
-      el.style.opacity = `${1 - progress * 0.7}`
-      el.style.transform = `translateY(${progress * -30}px) scale(${1 + progress * 0.05})`
+      target = Math.min(Math.max(window.scrollY / (vh * 0.6), 0), 1)
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
+    const animate = () => {
+      current = lerp(current, target, 0.08)
+
+      if (Math.abs(current - target) < 0.0001) current = target
+
+      const el = nameRef.current
+      if (el) {
+        el.style.letterSpacing = `${-0.04 + current * 0.15}em`
+        el.style.opacity = `${1 - current * 0.7}`
+        el.style.transform = `translateY(${current * -30}px) scale(${1 + current * 0.05})`
+      }
+
+      rafId = requestAnimationFrame(animate)
+    }
+
+    window.addEventListener('scroll', updateTarget, { passive: true })
+    updateTarget()
+    rafId = requestAnimationFrame(animate)
+
+    return () => {
+      window.removeEventListener('scroll', updateTarget)
+      cancelAnimationFrame(rafId)
+    }
   }, [])
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {

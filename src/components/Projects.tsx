@@ -13,6 +13,15 @@ interface Project {
   highlights: string[]
   image: string
   canIframe: boolean
+  iframeUrl?: string
+}
+
+function isMobileOrIOS(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const ua = navigator.userAgent
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+  const isMobile = /Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < 768
+  return isIOS || isMobile
 }
 
 const projects: Project[] = [
@@ -53,7 +62,8 @@ const projects: Project[] = [
     tech: ['React', 'TypeScript', '3D / AR', 'Node.js', 'E-commerce'],
     highlights: ['3D Configurator', 'AR Try-on', 'Full-stack', 'Product Visualization'],
     image: '/preview-centuary.webp',
-    canIframe: false,
+    canIframe: true,
+    iframeUrl: 'http://43.205.153.173',
   },
 ]
 
@@ -68,18 +78,23 @@ function getHostname(url: string): string {
 function LivePreview({ project, isActive }: { project: Project; isActive: boolean }) {
   const [iframeLoaded, setIframeLoaded] = useState(false)
   const [showIframe, setShowIframe] = useState(false)
+  const [isMobile] = useState(() => isMobileOrIOS())
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
+  const canShowIframe = project.canIframe && !isMobile
+
   useEffect(() => {
-    if (isActive && project.canIframe && !showIframe) {
+    if (isActive && canShowIframe && !showIframe) {
       const timer = setTimeout(() => setShowIframe(true), 600)
       return () => clearTimeout(timer)
     }
-  }, [isActive, project.canIframe, showIframe])
+  }, [isActive, canShowIframe, showIframe])
 
   const handleIframeLoad = useCallback(() => {
     setIframeLoaded(true)
   }, [])
+
+  const iframeSrc = project.iframeUrl || project.url
 
   return (
     <div className="project-preview">
@@ -89,7 +104,7 @@ function LivePreview({ project, isActive }: { project: Project; isActive: boolea
             <span /><span /><span />
           </div>
           <div className="browser-url">{getHostname(project.url)}</div>
-          {project.canIframe && iframeLoaded && (
+          {canShowIframe && iframeLoaded && (
             <span className="browser-live-badge">LIVE</span>
           )}
         </div>
@@ -105,10 +120,10 @@ function LivePreview({ project, isActive }: { project: Project; isActive: boolea
             className="browser-screenshot"
             loading="lazy"
           />
-          {project.canIframe && showIframe && (
+          {canShowIframe && showIframe && (
             <iframe
               ref={iframeRef}
-              src={project.url}
+              src={iframeSrc}
               title={`${project.title} live preview`}
               className={`browser-iframe ${iframeLoaded ? 'loaded' : ''}`}
               loading="lazy"
