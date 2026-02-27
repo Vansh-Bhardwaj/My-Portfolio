@@ -18,3 +18,5 @@ See `package.json` for all scripts. Key ones:
 - The site uses Google Fonts (Space Grotesk), loaded via CDN in `index.html`.
 - CSS is split into `src/index.css` (reset/variables) and `src/App.css` (component styles).
 - All scroll-reveal animations use a custom `useInView` hook backed by IntersectionObserver.
+- Lenis smooth scroll is initialized in `App.tsx`; do NOT add `scroll-behavior: smooth` to CSS.
+- The "Selected Work" section uses a scroll-takeover pattern (sticky + scroll-driven state) — its container height is `numProjects * 100vh`.
