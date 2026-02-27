@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react'
+
 function SplitLine({ text, baseDelay, className = '' }: { text: string; baseDelay: number; className?: string }) {
   return (
     <span className={`split-line ${className}`}>
@@ -15,6 +17,25 @@ function SplitLine({ text, baseDelay, className = '' }: { text: string; baseDela
 }
 
 export default function Hero() {
+  const nameRef = useRef<HTMLHeadingElement>(null)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const el = nameRef.current
+      if (!el) return
+      const scrollY = window.scrollY
+      const vh = window.innerHeight
+      const progress = Math.min(scrollY / (vh * 0.6), 1)
+      
+      el.style.letterSpacing = `${-0.04 + progress * 0.15}em`
+      el.style.opacity = `${1 - progress * 0.7}`
+      el.style.transform = `translateY(${progress * -30}px) scale(${1 + progress * 0.05})`
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   const go = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
     e.preventDefault()
     const el = document.querySelector(target)
@@ -28,7 +49,7 @@ export default function Hero() {
       <p className="hero-label animate-in" style={{ animationDelay: '0.8s' }}>
         Software Developer &amp; Creative Technologist
       </p>
-      <h1 className="hero-name">
+      <h1 className="hero-name" ref={nameRef}>
         <SplitLine text="Vansh" baseDelay={1.0} />
         <SplitLine text="Bhardwaj" baseDelay={1.3} className="stroke" />
       </h1>

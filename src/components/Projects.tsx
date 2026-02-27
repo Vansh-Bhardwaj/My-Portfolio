@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import ArrowIcon from './ArrowIcon'
 
 interface Project {
   num: string
@@ -33,7 +34,7 @@ const projects: Project[] = [
     title: 'DebridUI',
     subtitle: 'Open Source',
     desc: 'A privacy-first debrid client I actively maintain. Built-in player, cross-device sync, subtitle support, and media discovery across Real-Debrid, TorBox, AllDebrid, and Premiumize \u2014 all edge-deployed on Cloudflare Workers.',
-    year: '2025 \u2013 Present',
+    year: '2026 \u2013 Present',
     url: 'https://debridui.viperadnan.com',
     role: 'Creator & Active Maintainer',
     tech: ['Next.js', 'TypeScript', 'Cloudflare Workers'],
@@ -45,12 +46,12 @@ const projects: Project[] = [
     num: '03',
     title: 'Centuary Sofas',
     subtitle: 'Client Project \u00B7 Simapt',
-    desc: 'E-commerce platform for India\u2019s leading mattress brand. Features a real-time 3D product configurator with AR try-on, letting customers visualize sofas in their own space before buying.',
+    desc: 'End-to-end e-commerce platform for India\u2019s leading mattress brand. Built the frontend, backend APIs, 3D product configurator with AR try-on, and managed hosting \u2014 letting customers visualize sofas in their own space before buying.',
     year: '2025',
     url: 'https://sofa.centuaryindia.com',
-    role: 'Frontend Developer at Simapt',
-    tech: ['React', 'TypeScript', '3D / AR', 'E-commerce'],
-    highlights: ['3D Configurator', 'AR Try-on', 'Product Visualization'],
+    role: 'Full-stack Developer at Simapt',
+    tech: ['React', 'TypeScript', '3D / AR', 'Node.js', 'E-commerce'],
+    highlights: ['3D Configurator', 'AR Try-on', 'Full-stack', 'Product Visualization'],
     image: '/preview-centuary.webp',
     canIframe: false,
   },
@@ -117,7 +118,7 @@ function LivePreview({ project, isActive }: { project: Project; isActive: boolea
           )}
           <div className="browser-overlay">
             <span>Visit Site</span>
-            <span className="browser-overlay-arrow">&#8599;</span>
+            <ArrowIcon size={14} />
           </div>
         </a>
       </div>
@@ -200,7 +201,7 @@ export default function Projects() {
                   rel="noopener noreferrer"
                   className="project-visit-btn"
                 >
-                  Visit Live Site <span>&#8599;</span>
+                  Visit Live Site <ArrowIcon />
                 </a>
               </div>
             </div>

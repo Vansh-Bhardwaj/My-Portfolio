@@ -6,8 +6,11 @@ const skills = [
   'Cloudflare Workers', 'GSAP', 'Blender', 'Vuforia',
 ]
 
+const manifesto = 'I care about craft, speed, and shipping things that actually work.'
+
 export default function About() {
   const { ref, isVisible } = useInView()
+  const { ref: manifestoRef, isVisible: manifestoVisible } = useInView(0.3)
 
   return (
     <section id="about" className="section">
@@ -45,19 +48,19 @@ export default function About() {
               </div>
             </div>
           </div>
-          <div className="about-stats">
-            <div className="about-stat">
-              <div className="about-stat-num">12</div>
-              <div className="about-stat-label">Products Shipped</div>
-            </div>
-            <div className="about-stat">
-              <div className="about-stat-num">4</div>
-              <div className="about-stat-label">Companies</div>
-            </div>
-            <div className="about-stat">
-              <div className="about-stat-num">5</div>
-              <div className="about-stat-label">Disciplines</div>
-            </div>
+          <div
+            ref={manifestoRef}
+            className={`about-manifesto ${manifestoVisible ? 'visible' : ''}`}
+          >
+            {manifesto.split(' ').map((word, i) => (
+              <span
+                key={i}
+                className="manifesto-word"
+                style={{ transitionDelay: `${i * 0.06}s` }}
+              >
+                {word}{' '}
+              </span>
+            ))}
           </div>
         </div>
       </div>

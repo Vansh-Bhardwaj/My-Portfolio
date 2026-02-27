@@ -1,4 +1,5 @@
 import { useInView } from '../hooks/useInView'
+import ArrowIcon from './ArrowIcon'
 
 interface CreativeProject {
   title: string
@@ -10,20 +11,6 @@ interface CreativeProject {
 }
 
 const creativeProjects: CreativeProject[] = [
-  {
-    title: 'Nimbus: Citadel of Clouds',
-    category: 'VR Game',
-    desc: 'VR puzzle-exploration with floating islands, weapon mechanics, and enemy AI. Rebuilt the rendering pipeline for a 4\u00D7 framerate gain (30 \u2192 120 fps).',
-    tech: ['Unity', 'C#', 'VR', 'Rendering'],
-    accent: '#6366F1',
-  },
-  {
-    title: 'Chronicles of Eldoria',
-    category: 'Top-Down RPG',
-    desc: 'Solo-built RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine.',
-    tech: ['Unity', 'AI Systems', 'Game Design'],
-    accent: '#F43F5E',
-  },
   {
     title: 'AR Applications Suite',
     category: 'Augmented Reality',
@@ -45,6 +32,20 @@ const creativeProjects: CreativeProject[] = [
       label: 'Google Play',
     },
     accent: '#10B981',
+  },
+  {
+    title: 'Nimbus: Citadel of Clouds',
+    category: 'VR Game',
+    desc: 'VR puzzle-exploration with floating islands, weapon mechanics, and enemy AI. Rebuilt the rendering pipeline for a 4\u00D7 framerate gain (30 \u2192 120 fps).',
+    tech: ['Unity', 'C#', 'VR', 'Rendering'],
+    accent: '#6366F1',
+  },
+  {
+    title: 'Chronicles of Eldoria',
+    category: 'Top-Down RPG',
+    desc: 'Team-built RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine.',
+    tech: ['Unity', 'AI Systems', 'Game Design'],
+    accent: '#F43F5E',
   },
   {
     title: '3D Assets & Models',
@@ -94,7 +95,7 @@ export default function Creative() {
                     rel="noopener noreferrer"
                     className="creative-card-link"
                   >
-                    {project.link.label} <span>&#8599;</span>
+                    {project.link.label} <ArrowIcon size={10} />
                   </a>
                 )}
               </div>
