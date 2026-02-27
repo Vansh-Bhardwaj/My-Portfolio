@@ -91,11 +91,6 @@
   100% { transform: scaleY(0); transform-origin: bottom; }
 }
 
-@keyframes livePulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
 /* ===== Arrow Icon ===== */
 
 .arrow-icon {
@@ -598,17 +593,6 @@ button:hover .arrow-icon {
   flex: 1;
 }
 
-.browser-live-badge {
-  font-size: 0.5625rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: #10B981;
-  padding: 2px 6px;
-  border: 1px solid #10B981;
-  border-radius: 3px;
-  animation: livePulse 2s ease infinite;
-}
-
 .browser-viewport {
   display: block;
   aspect-ratio: 16 / 10;
@@ -618,28 +602,41 @@ button:hover .arrow-icon {
   color: inherit;
 }
 
-.browser-screenshot {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top left;
-  display: block;
-}
-
-.browser-iframe {
+.gallery-image {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  border: none;
+  object-fit: cover;
+  object-position: top left;
   opacity: 0;
-  transition: opacity 0.6s ease;
-  pointer-events: none;
-  background: var(--bg-alt);
+  transform: scale(1.04);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.browser-iframe.loaded {
+.gallery-image.active {
   opacity: 1;
+  transform: scale(1);
+}
+
+.gallery-dots {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.gallery-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 0.3s ease, transform 0.3s ease;
+}
+
+.gallery-dot.active {
+  background: var(--accent);
+  transform: scale(1.4);
 }
 
 .browser-overlay {
@@ -1028,13 +1025,6 @@ button:hover .arrow-icon {
 
   .browser-frame {
     border-radius: 8px;
-  }
-
-  .browser-iframe {
-    transform: scale(0.5);
-    transform-origin: top left;
-    width: 200%;
-    height: 200%;
   }
 
   .creative-grid {

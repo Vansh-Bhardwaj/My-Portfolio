@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ArrowIcon from './ArrowIcon'
 
 interface Project {
@@ -11,19 +11,7 @@ interface Project {
   role: string
   tech: string[]
   highlights: string[]
-  image: string
-  canIframe: boolean
-  iframeUrl?: string
-}
-
-const MOBILE_BREAKPOINT = 768
-
-function isMobileOrIOS(): boolean {
-  if (typeof navigator === 'undefined') return false
-  const ua = navigator.userAgent
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  const isMobile = /Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < MOBILE_BREAKPOINT
-  return isIOS || isMobile
+  images: string[]
 }
 
 const projects: Project[] = [
@@ -37,8 +25,7 @@ const projects: Project[] = [
     role: 'Co-Founder & Lead Developer',
     tech: ['Next.js', 'Unity', 'Game Dev'],
     highlights: ['Published on Google Play', 'VR/AR Games', 'Studio Dashboard'],
-    image: '/preview-allvarity.webp',
-    canIframe: true,
+    images: ['/preview-allvarity.webp', '/preview-allvarity-games.webp'],
   },
   {
     num: '02',
@@ -50,8 +37,7 @@ const projects: Project[] = [
     role: 'Creator & Active Maintainer',
     tech: ['Next.js', 'TypeScript', 'Cloudflare Workers'],
     highlights: ['Built-in Player', 'Multi-provider', 'Privacy-first', 'Open Source'],
-    image: '/preview-debrid.webp',
-    canIframe: true,
+    images: ['/preview-debrid.webp', '/preview-debrid-landing.webp', '/preview-debrid-media.webp'],
   },
   {
     num: '03',
@@ -63,9 +49,7 @@ const projects: Project[] = [
     role: 'Full-stack Developer at Simapt',
     tech: ['React', 'TypeScript', '3D / AR', 'Node.js', 'E-commerce'],
     highlights: ['3D Configurator', 'AR Try-on', 'Full-stack', 'Product Visualization'],
-    image: '/preview-centuary.webp',
-    canIframe: true,
-    iframeUrl: 'http://43.205.153.173/sofas',
+    images: ['/preview-centuary.webp', '/preview-centuary-configurator.webp', '/preview-centuary-product.webp', '/preview-centuary-velveteen.webp'],
   },
 ]
 
@@ -77,37 +61,8 @@ function getHostname(url: string): string {
   }
 }
 
-function LivePreview({ project, isActive }: { project: Project; isActive: boolean }) {
-  const [iframeLoaded, setIframeLoaded] = useState(false)
-  const [showIframe, setShowIframe] = useState(false)
-  const [isMobile] = useState(() => isMobileOrIOS())
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-
-  const canShowIframe = project.canIframe && !isMobile
-
-  useEffect(() => {
-    if (isActive && canShowIframe && !showIframe) {
-      const timer = setTimeout(() => setShowIframe(true), 600)
-      return () => clearTimeout(timer)
-    }
-  }, [isActive, canShowIframe, showIframe])
-
-  const handleIframeLoad = useCallback(() => {
-    const iframe = iframeRef.current
-    if (!iframe) return
-    // Delay check so the browser has time to settle after a potential X-Frame-Options block
-    setTimeout(() => {
-      try {
-        const loc = iframe.contentWindow?.location?.href
-        if (!loc || loc === 'about:blank') return
-      } catch {
-        // Cross-origin access error — external site loaded successfully
-      }
-      setIframeLoaded(true)
-    }, 200)
-  }, [])
-
-  const iframeSrc = project.iframeUrl || project.url
+function ProjectGallery({ project, imageIndex }: { project: Project; imageIndex: number }) {
+  const count = project.images.length
 
   return (
     <div className="project-preview">
@@ -117,8 +72,12 @@ function LivePreview({ project, isActive }: { project: Project; isActive: boolea
             <span /><span /><span />
           </div>
           <div className="browser-url">{getHostname(project.url)}</div>
-          {canShowIframe && iframeLoaded && (
-            <span className="browser-live-badge">LIVE</span>
+          {count > 1 && (
+            <div className="gallery-dots">
+              {project.images.map((_, i) => (
+                <span key={i} className={`gallery-dot ${i === imageIndex ? 'active' : ''}`} />
+              ))}
+            </div>
           )}
         </div>
         <a
@@ -127,23 +86,15 @@ function LivePreview({ project, isActive }: { project: Project; isActive: boolea
           rel="noopener noreferrer"
           className="browser-viewport"
         >
-          <img
-            src={project.image}
-            alt={`${project.title} preview`}
-            className="browser-screenshot"
-            loading="lazy"
-          />
-          {canShowIframe && showIframe && (
-            <iframe
-              ref={iframeRef}
-              src={iframeSrc}
-              title={`${project.title} live preview`}
-              className={`browser-iframe ${iframeLoaded ? 'loaded' : ''}`}
+          {project.images.map((src, i) => (
+            <img
+              key={src}
+              src={src}
+              alt={`${project.title} preview ${i + 1}`}
+              className={`gallery-image ${i === imageIndex ? 'active' : ''}`}
               loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-              onLoad={handleIframeLoad}
             />
-          )}
+          ))}
           <div className="browser-overlay">
             <span>Visit Site</span>
             <ArrowIcon size={14} />
@@ -157,6 +108,7 @@ function LivePreview({ project, isActive }: { project: Project; isActive: boolea
 export default function Projects() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [activeIndex, setActiveIndex] = useState(0)
+  const [imageIndex, setImageIndex] = useState(0)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -169,7 +121,13 @@ export default function Projects() {
       const scrolled = -rect.top
       const progress = Math.max(0, Math.min(0.999, scrolled / totalScroll))
       const index = Math.floor(progress * projects.length)
-      setActiveIndex(Math.max(0, Math.min(index, projects.length - 1)))
+      const newActive = Math.max(0, Math.min(index, projects.length - 1))
+      setActiveIndex(newActive)
+
+      const projectProgress = progress * projects.length
+      const subProgress = projectProgress - Math.floor(projectProgress)
+      const imgCount = projects[newActive].images.length
+      setImageIndex(Math.min(Math.floor(subProgress * imgCount), imgCount - 1))
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -198,7 +156,10 @@ export default function Projects() {
               key={project.num}
               className={`project-slide ${i === activeIndex ? 'active' : ''}`}
             >
-              <LivePreview project={project} isActive={i === activeIndex} />
+              <ProjectGallery
+                project={project}
+                imageIndex={i === activeIndex ? imageIndex : 0}
+              />
               <div className="project-details">
                 <span className="project-slide-num">{project.num}</span>
                 <h3 className="project-slide-title">{project.title}</h3>
