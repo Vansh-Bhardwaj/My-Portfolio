@@ -25,6 +25,7 @@ export default function Navbar() {
       <div className="nav-links">
         <a href="#about" onClick={(e) => go(e, '#about')}>About</a>
         <a href="#work" onClick={(e) => go(e, '#work')}>Work</a>
+        <a href="#creative" onClick={(e) => go(e, '#creative')}>Creative</a>
         <a href="#contact" onClick={(e) => go(e, '#contact')}>Contact</a>
       </div>
     </nav>

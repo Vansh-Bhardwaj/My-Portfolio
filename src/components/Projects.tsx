@@ -9,7 +9,8 @@ interface Project {
   url: string
   role: string
   tech: string[]
-  color: string
+  preview: 'iframe' | 'image'
+  image?: string
 }
 
 const projects: Project[] = [
@@ -17,12 +18,13 @@ const projects: Project[] = [
     num: '01',
     title: 'Centuary Sofas',
     subtitle: 'Simapt \u00D7 Centuary India',
-    desc: 'Responsive product configurator enabling customers to customize and visualize sofa designs in real-time. Built for India\u2019s leading mattress brand.',
+    desc: 'Responsive product configurator with 3D visualization, enabling customers to customize and explore sofa designs interactively. Built for India\u2019s leading mattress brand.',
     year: '2025',
     url: 'https://sofa.centuaryindia.com',
     role: 'Frontend Developer at Simapt',
-    tech: ['React', 'TypeScript', 'Web'],
-    color: '#C4A882',
+    tech: ['React', 'TypeScript', '3D Web'],
+    preview: 'image',
+    image: '/preview-centuary.webp',
   },
   {
     num: '02',
@@ -33,7 +35,8 @@ const projects: Project[] = [
     url: 'https://debrid.indevs.in',
     role: 'Creator',
     tech: ['Next.js', 'TypeScript', 'Cloudflare'],
-    color: '#6366F1',
+    preview: 'image',
+    image: '/preview-debrid.webp',
   },
   {
     num: '03',
@@ -44,7 +47,7 @@ const projects: Project[] = [
     url: 'https://allvaritygames.com',
     role: 'Co-Founder & Lead Developer',
     tech: ['Next.js', 'Unity', 'Game Dev'],
-    color: '#10B981',
+    preview: 'iframe',
   },
 ]
 
@@ -56,43 +59,44 @@ function getHostname(url: string): string {
   }
 }
 
-function BrowserMockup({ url, color }: { url: string; color: string }) {
+function BrowserMockup({ project }: { project: Project }) {
+  const [iframeLoaded, setIframeLoaded] = useState(false)
+
   return (
     <div className="browser-frame">
       <div className="browser-bar">
         <div className="browser-dots">
           <span /><span /><span />
         </div>
-        <div className="browser-url">{getHostname(url)}</div>
+        <div className="browser-url">{getHostname(project.url)}</div>
       </div>
       <a
-        href={url}
+        href={project.url}
         target="_blank"
         rel="noopener noreferrer"
         className="browser-viewport"
       >
-        <div className="browser-preview" style={{ '--pc': color } as React.CSSProperties}>
-          <div className="preview-skeleton">
-            <div className="preview-sk-nav">
-              <span style={{ width: '48px' }} />
-              <div className="preview-sk-links">
-                <span style={{ width: '24px' }} />
-                <span style={{ width: '24px' }} />
-                <span style={{ width: '24px' }} />
-              </div>
-            </div>
-            <div className="preview-sk-hero">
-              <span style={{ width: '65%', height: '16px' }} />
-              <span style={{ width: '40%', height: '10px' }} />
-              <span style={{ width: '80px', height: '28px', borderRadius: '4px' }} />
-            </div>
-            <div className="preview-sk-grid">
-              <span /><span /><span />
-            </div>
-          </div>
-        </div>
+        {project.preview === 'iframe' ? (
+          <>
+            <iframe
+              src={project.url}
+              title={`${project.title} preview`}
+              className={`browser-iframe ${iframeLoaded ? 'loaded' : ''}`}
+              loading="lazy"
+              sandbox="allow-scripts allow-same-origin"
+              onLoad={() => setIframeLoaded(true)}
+            />
+            {!iframeLoaded && <div className="browser-loading">Loading&hellip;</div>}
+          </>
+        ) : (
+          <img
+            src={project.image}
+            alt={`${project.title} preview`}
+            className="browser-screenshot"
+          />
+        )}
         <div className="browser-overlay">
-          <span>Visit Site</span>
+          <span>Visit Live Site</span>
           <span className="browser-overlay-arrow">&#8599;</span>
         </div>
       </a>
@@ -145,7 +149,7 @@ export default function Projects() {
               className={`project-slide ${i === activeIndex ? 'active' : ''}`}
             >
               <div className="project-preview">
-                <BrowserMockup url={project.url} color={project.color} />
+                <BrowserMockup project={project} />
               </div>
               <div className="project-details">
                 <span className="project-slide-num">{project.num}</span>
@@ -166,6 +170,14 @@ export default function Projects() {
                     <span className="info-value">{project.year}</span>
                   </div>
                 </div>
+                <a
+                  href={project.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-visit-btn"
+                >
+                  Visit Live Site <span>&#8599;</span>
+                </a>
               </div>
             </div>
           ))}

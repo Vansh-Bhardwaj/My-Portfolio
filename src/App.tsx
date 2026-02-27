@@ -5,6 +5,7 @@ import Hero from './components/Hero'
 import Marquee from './components/Marquee'
 import About from './components/About'
 import Projects from './components/Projects'
+import Creative from './components/Creative'
 import Contact from './components/Contact'
 import './App.css'
 
@@ -41,6 +42,7 @@ function App() {
         <Marquee />
         <About />
         <Projects />
+        <Creative />
         <Contact />
       </main>
       <footer className="footer">

@@ -514,6 +514,38 @@
   border-radius: 4px;
 }
 
+.browser-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.browser-iframe.loaded {
+  opacity: 1;
+}
+
+.browser-screenshot {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top left;
+}
+
+.browser-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .browser-overlay {
   position: absolute;
   inset: 0;
@@ -521,7 +553,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: rgba(12, 12, 12, 0.8);
+  background: rgba(12, 12, 12, 0.75);
   opacity: 0;
   transition: opacity 0.3s ease;
   font-size: 0.8125rem;
@@ -609,6 +641,37 @@
   font-weight: 500;
 }
 
+/* Visit Button */
+
+.project-visit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 10px 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--bg);
+  background: var(--accent);
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.project-visit-btn:hover {
+  opacity: 0.85;
+}
+
+.project-visit-btn span {
+  font-size: 1rem;
+  transition: transform 0.3s ease;
+}
+
+.project-visit-btn:hover span {
+  transform: translate(2px, -2px);
+}
+
 /* Progress Bar */
 
 .projects-progress-track {
@@ -623,6 +686,96 @@
   background: var(--accent);
   transform-origin: left;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ===== Creative Work ===== */
+
+.creative-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.creative-card {
+  border: 1px solid var(--border);
+  padding: clamp(24px, 3vw, 36px);
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.3s ease;
+}
+
+.creative-card:hover {
+  border-color: var(--card-accent, var(--accent));
+}
+
+.creative-card-header {
+  margin-bottom: 20px;
+}
+
+.creative-category {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--card-accent, var(--accent));
+}
+
+.creative-card-title {
+  font-size: clamp(1.125rem, 1.6vw, 1.5rem);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.creative-card-desc {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-bottom: 20px;
+  flex: 1;
+}
+
+.creative-card-tech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 20px;
+}
+
+.creative-tech-tag {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.creative-card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--card-accent, var(--accent));
+  transition: opacity 0.3s ease;
+}
+
+.creative-card-link:hover {
+  opacity: 0.75;
+}
+
+.creative-card-link span {
+  font-size: 0.875rem;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.creative-card-link:hover span {
+  transform: translate(2px, -2px);
 }
 
 /* ===== Contact ===== */
@@ -744,5 +897,9 @@
 
   .projects-sticky {
     padding-top: clamp(64px, 8vh, 80px);
+  }
+
+  .creative-grid {
+    grid-template-columns: 1fr;
   }
 }
