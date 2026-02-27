@@ -1,33 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useEffect, useState } from 'react'
+import Lenis from 'lenis'
+import Navbar from './components/Navbar'
+import Hero from './components/Hero'
+import Marquee from './components/Marquee'
+import About from './components/About'
+import Projects from './components/Projects'
+import Creative from './components/Creative'
+import Contact from './components/Contact'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+    })
+
+    function raf(time: number) {
+      lenis.raf(time)
+      requestAnimationFrame(raf)
+    }
+
+    requestAnimationFrame(raf)
+
+    const timer = setTimeout(() => setLoaded(true), 100)
+
+    return () => {
+      lenis.destroy()
+      clearTimeout(timer)
+    }
+  }, [])
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <div className={`page-loader ${loaded ? 'done' : ''}`} />
+      <Navbar />
+      <main>
+        <Hero />
+        <Marquee />
+        <About />
+        <Projects />
+        <Creative />
+        <Contact />
+      </main>
+      <footer className="footer">
+        <div className="container footer-inner">
+          <span>&copy; {new Date().getFullYear()} Vansh Bhardwaj</span>
+          <span>Built with passion</span>
+        </div>
+      </footer>
     </>
   )
 }
