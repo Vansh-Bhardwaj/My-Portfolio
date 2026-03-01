@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, lazy, Suspense } from 'react'
 import Lenis from 'lenis'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import Marquee from './components/Marquee'
-import About from './components/About'
-import Projects from './components/Projects'
-import Creative from './components/Creative'
-import Contact from './components/Contact'
 import './App.css'
+
+const About = lazy(() => import('./components/About'))
+const Projects = lazy(() => import('./components/Projects'))
+const Creative = lazy(() => import('./components/Creative'))
+const Contact = lazy(() => import('./components/Contact'))
 
 function App() {
   const [loaded, setLoaded] = useState(false)
@@ -41,10 +42,12 @@ function App() {
       <main>
         <Hero />
         <Marquee />
-        <About />
-        <Projects />
-        <Creative />
-        <Contact />
+        <Suspense fallback={null}>
+          <About />
+          <Projects />
+          <Creative />
+          <Contact />
+        </Suspense>
       </main>
       <footer className="footer">
         <div className="container footer-inner">
