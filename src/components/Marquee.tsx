@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 
 const roles = [
-  'Software Developer', 'Creative Technologist', 'Co-Founder',
-  'Game Developer', 'VR / AR', '3D Visualization',
-  'Product UI', 'Frontend Systems',
+  'Performance', 'Web Development', 'Creative Technologist',
+  'Game Dev', 'VR / AR', '3D Visualization',
+  'Product UI', 'Shaders', 'Frontend Systems',
 ]
 const tech = [
   'React', 'Next.js', 'TypeScript', 'Unity', 'C#',

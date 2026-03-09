@@ -7,9 +7,9 @@ const skills = [
 ]
 
 const stats = [
-  { value: '6+', label: 'Products Shipped' },
-  { value: '5+', label: 'Companies Worked With' },
-  { value: '4', label: 'Disciplines' },
+  { value: '12', label: 'Products Shipped' },
+  { value: '4', label: 'Companies Worked With' },
+  { value: '5', label: 'Disciplines' },
 ]
 
 const manifesto = 'I care about craft, speed, and shipping things that actually work.'
@@ -41,7 +41,9 @@ export default function About() {
               and shipped VR products. With a B.Tech in Computer Science
               specializing in Graphics &amp; Gaming from <strong>UPES</strong>,
               I bring a systems&#8209;level understanding of rendering pipelines,
-              interaction design, and frontend architecture.
+              interaction design, and frontend architecture. Every project I
+              take on ships with intention &mdash; optimized, accessible,
+              and built to last.
             </div>
             <div className="about-details">
               <div className="about-detail-item">

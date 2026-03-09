@@ -23,16 +23,22 @@ const experience: TimelineItem[] = [
     desc: 'Engineering product-focused web platforms with fast iteration cycles, component-driven architecture, and systems designed for long-term maintainability.',
   },
   {
-    period: 'Feb \u2013 Jul 2025',
+    period: '2025',
     title: 'Freelance Developer & Mentor',
     org: 'Independent \u00B7 Remote',
     desc: 'Led VR development for a medical-center walkthrough. Delivered custom shaders, real-time animations, and production 3D assets for a mobile game studio.',
   },
   {
-    period: 'Jan \u2013 May 2024',
+    period: 'Jun \u2013 Jul 2024',
+    title: 'Software Developer',
+    org: 'Phemsoft Software Pvt. Ltd. \u00B7 Dehradun',
+    desc: 'Engineered a physics-based water simulation in Unity, cutting draw calls by 40% through batching optimizations and custom LOD strategies.',
+  },
+  {
+    period: 'May 2024',
     title: 'Gameplay Programmer',
     org: 'GameDept Technologies \u00B7 Rajasthan',
-    desc: 'Developed responsive player-movement mechanics for a platformer and designed levels with progressively complex gameplay challenges.',
+    desc: 'Developed responsive player-movement mechanics for a platformer and designed three levels with progressively complex gameplay challenges.',
   },
 ]
 
@@ -40,24 +46,19 @@ const education = {
   period: '2021 \u2013 2025',
   title: 'B.Tech, Computer Science \u2014 Graphics & Gaming',
   org: 'UPES \u2014 University of Petroleum & Energy Studies',
-  desc: 'Four-year specialization in real-time rendering, game engine architecture, shader programming, and interactive media.',
+  desc: 'Four-year specialization in real-time rendering, game engine architecture, shader programming, and interactive media. Graduated 2025.',
 }
 
 const eduProjects: EduProject[] = [
   {
     title: 'Nimbus: Citadel of Clouds',
-    label: 'VR Team Project',
-    desc: 'Puzzle-exploration VR title across floating islands. Rebuilt the rendering pipeline for a 4\u00D7 framerate gain, shipped weapon mechanics and spatial enemy AI.',
+    label: 'Project Lead \u00B7 Aug\u2013Dec 2024',
+    desc: 'Directed a VR puzzle-exploration title from concept to completion. Rebuilt the rendering pipeline to achieve a 4\u00D7 framerate improvement while shipping weapon mechanics and spatial enemy AI.',
   },
   {
     title: 'Chronicles of Eldoria',
-    label: 'Solo Project',
-    desc: 'Top-down RPG with a full inventory system, A*-driven enemy AI, and a branching dialogue engine powering non-linear storytelling.',
-  },
-  {
-    title: 'Phemsoft Software Pvt. Ltd.',
-    label: 'Internship',
-    desc: 'Engineered a physics-based water simulation in Unity, cutting draw calls by 40% through batching optimizations and custom LOD strategies.',
+    label: 'Solo Project \u00B7 Jan\u2013May 2024',
+    desc: 'Solo-built a top-down RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine powering non-linear storytelling.',
   },
 ]
 
@@ -90,7 +91,10 @@ export default function Experience() {
     <section id="experience" className="section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">Experience & Education</p>
+          <p className="section-label">Experience &amp; Education</p>
+          <p className="experience-intro">
+            A timeline of roles, projects, and milestones that shaped how I build software.
+          </p>
         </div>
 
         <div className="timeline">

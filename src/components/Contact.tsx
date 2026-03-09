@@ -51,23 +51,15 @@ export default function Contact() {
             Together
           </h2>
           <p className="contact-desc">
-            Open to product roles, creative collaborations,
-            and interesting technical challenges.
+            Open to product roles, creative collaborations, and challenging
+            technical problems. If it ships and it matters, I&rsquo;m interested.
           </p>
           <div className="contact-links">
             <MagneticLink
               href="mailto:work.vanshbhardwaj@gmail.com"
               className="contact-link"
             >
-              Email
-            </MagneticLink>
-            <MagneticLink
-              href="https://github.com/Vansh-Bhardwaj"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="contact-link"
-            >
-              GitHub
+              work.vanshbhardwaj@gmail.com
             </MagneticLink>
             <MagneticLink
               href="https://www.linkedin.com/in/vansh-bhardwaj-780271221/"
@@ -76,6 +68,14 @@ export default function Contact() {
               className="contact-link"
             >
               LinkedIn
+            </MagneticLink>
+            <MagneticLink
+              href="https://github.com/Vansh-Bhardwaj"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-link"
+            >
+              GitHub
             </MagneticLink>
             <MagneticLink
               href="https://twitter.com/I_Am_VanshBh"

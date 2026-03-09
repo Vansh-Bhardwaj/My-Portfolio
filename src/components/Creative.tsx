@@ -12,60 +12,65 @@ interface CreativeProject {
 
 const creativeProjects: CreativeProject[] = [
   {
-    title: 'AR Applications Suite',
-    category: 'Augmented Reality',
-    desc: 'Collection of AR experiences \u2014 bowling sim, spatial calculator, and gesture-driven controls on Vuforia and LightshipAR.',
-    tech: ['Vuforia', 'LightshipAR', 'Unity'],
-    link: {
-      url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
-      label: 'Watch Showreel',
-    },
-    accent: '#F59E0B',
-  },
-  {
-    title: 'Pirate Cannon',
-    category: 'Mobile Game',
-    desc: 'Hyper-casual cannon shooter published on Google Play under AllVarity Studio. 100+ downloads.',
-    tech: ['Unity', 'C#', 'Android'],
-    link: {
-      url: 'https://play.google.com/store/apps/details?id=com.allvarity.piratecannon',
-      label: 'Google Play',
-    },
-    accent: '#10B981',
-  },
-  {
     title: 'Nimbus: Citadel of Clouds',
     category: 'VR Game',
-    desc: 'VR puzzle-exploration with floating islands, weapon mechanics, and enemy AI. Rebuilt the rendering pipeline for a 4\u00D7 framerate gain (30 \u2192 120 fps).',
-    tech: ['Unity', 'C#', 'VR', 'Rendering'],
+    desc: 'Puzzle-exploration VR title set across floating islands. Rebuilt the rendering pipeline from scratch, boosting framerate from 30 fps to 120 fps while adding weapon mechanics and spatial enemy AI.',
+    tech: ['Unity', 'VR', 'Rendering'],
+    link: {
+      url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
+      label: 'View Media',
+    },
     accent: '#6366F1',
   },
   {
     title: 'Chronicles of Eldoria',
     category: 'Top-Down RPG',
-    desc: 'Team-built RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine.',
+    desc: 'Solo-built RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine powering non-linear narrative paths.',
     tech: ['Unity', 'AI Systems', 'Game Design'],
     accent: '#F43F5E',
   },
   {
-    title: '3D Assets & Models',
+    title: 'AR Applications Suite',
+    category: 'Augmented Reality',
+    desc: 'Production AR experiences including a bowling simulator, a spatial 3D calculator, and gesture-driven interaction layers built on Vuforia and LightshipAR.',
+    tech: ['Vuforia', 'LightshipAR', 'Mobile'],
+    link: {
+      url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
+      label: 'View Media',
+    },
+    accent: '#F59E0B',
+  },
+  {
+    title: '3D Assets & Environments',
     category: '3D Modeling',
     desc: 'High-fidelity product renders, detailed castle environments, campus visualizations, and weapon models delivered for games, marketing, and client presentations.',
     tech: ['Blender', 'Texturing', 'Rendering'],
+    link: {
+      url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
+      label: 'View Media',
+    },
     accent: '#8B5CF6',
   },
   {
     title: 'Custom Shader Systems',
-    category: 'Real-time Shaders',
+    category: 'Real-Time Shaders',
     desc: 'Procedural water simulation, stylized toon shading, and GPU\u2011driven visual effects engineered for real-time performance in Unity.',
     tech: ['HLSL', 'Shader Graph', 'Unity'],
+    link: {
+      url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
+      label: 'View Media',
+    },
     accent: '#14B8A6',
   },
   {
     title: 'VR Temple Experience',
     category: 'Virtual Reality',
-    desc: 'Immersive sacred temple with volumetric lighting, interactive elements, and hand-modeled architectural detail.',
+    desc: 'Fully immersive sacred architecture with interactive elements, volumetric lighting, and hand-modeled detail \u2014 optimized for standalone VR headsets.',
     tech: ['Unity', 'VR', 'Lighting'],
+    link: {
+      url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
+      label: 'View Media',
+    },
     accent: '#EC4899',
   },
 ]
