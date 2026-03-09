@@ -25,7 +25,7 @@ const creativeProjects: CreativeProject[] = [
   {
     title: 'Chronicles of Eldoria',
     category: 'Top-Down RPG',
-    desc: 'Solo-built RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine powering non-linear narrative paths.',
+    desc: 'Team-built RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine powering non-linear narrative paths.',
     tech: ['Unity', 'AI Systems', 'Game Design'],
     accent: '#F43F5E',
   },

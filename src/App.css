@@ -727,18 +727,13 @@ button:hover .arrow-icon {
   height: auto;
   object-fit: cover;
   object-position: top center;
-  transition: transform 8s cubic-bezier(0.25, 0.1, 0.25, 1);
+  animation: screenshotPan 30s ease-in-out infinite;
   will-change: transform;
 }
 
-.project-card:hover .browser-screenshot {
-  transform: translateY(calc(-100% + 56.25vw));
-}
-
-@media (min-width: 1060px) {
-  .project-card:hover .browser-screenshot {
-    transform: translateY(calc(-100% + 596px));
-  }
+@keyframes screenshotPan {
+  0%, 100% { transform: translateY(0); }
+  40%, 60% { transform: translateY(-30%); }
 }
 
 /* footer */
@@ -815,16 +810,15 @@ button:hover .arrow-icon {
 .creative-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: auto auto;
   gap: 20px;
-}
-
-.creative-card:nth-child(1) {
-  grid-row: span 2;
 }
 
 .creative-card:nth-child(5) {
   grid-column: span 2;
+}
+
+.creative-card:nth-child(6) {
+  grid-column: span 1;
 }
 
 .creative-card {
@@ -1149,16 +1143,8 @@ button:hover .arrow-icon {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .creative-card:nth-child(1) {
-    grid-row: span 1;
-  }
-
   .creative-card:nth-child(5) {
     grid-column: span 1;
-  }
-
-  .creative-card:last-child {
-    grid-column: 1 / -1;
   }
 
   .stack-grid {
@@ -1238,10 +1224,6 @@ button:hover .arrow-icon {
 
   .browser-viewport {
     aspect-ratio: 4 / 3;
-  }
-
-  .project-card:hover .browser-screenshot {
-    transform: translateY(calc(-100% + 75vw));
   }
 
   .project-footer-row {

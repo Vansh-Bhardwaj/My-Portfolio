@@ -57,8 +57,8 @@ const eduProjects: EduProject[] = [
   },
   {
     title: 'Chronicles of Eldoria',
-    label: 'Solo Project \u00B7 Jan\u2013May 2024',
-    desc: 'Solo-built a top-down RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine powering non-linear storytelling.',
+    label: 'Team Project \u00B7 Jan\u2013May 2024',
+    desc: 'Built a top-down RPG featuring a full inventory system, A*-driven enemy AI, and a branching dialogue engine powering non-linear storytelling.',
   },
 ]
 
