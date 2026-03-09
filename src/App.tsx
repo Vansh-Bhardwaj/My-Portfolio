@@ -8,6 +8,8 @@ import './App.css'
 const About = lazy(() => import('./components/About'))
 const Projects = lazy(() => import('./components/Projects'))
 const Creative = lazy(() => import('./components/Creative'))
+const Experience = lazy(() => import('./components/Experience'))
+const Stack = lazy(() => import('./components/Stack'))
 const Contact = lazy(() => import('./components/Contact'))
 
 function App() {
@@ -46,13 +48,15 @@ function App() {
           <About />
           <Projects />
           <Creative />
+          <Experience />
+          <Stack />
           <Contact />
         </Suspense>
       </main>
       <footer className="footer">
         <div className="container footer-inner">
           <span>&copy; {new Date().getFullYear()} Vansh Bhardwaj</span>
-          <span>Built with craft</span>
+          <span>Designed &amp; Engineered by Hand</span>
         </div>
       </footer>
     </>

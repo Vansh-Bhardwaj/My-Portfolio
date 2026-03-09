@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useInView } from '../hooks/useInView'
+import { haptic } from '../hooks/useHaptics'
 
 function MagneticLink({ href, children, className = '', ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const linkRef = useRef<HTMLAnchorElement>(null)
@@ -29,6 +30,7 @@ function MagneticLink({ href, children, className = '', ...props }: React.Anchor
       className={`magnetic ${className}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={() => haptic('light')}
     >
       {children}
     </a>
@@ -42,30 +44,22 @@ export default function Contact() {
     <section id="contact" className="contact section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">Contact</p>
+          <p className="section-label"><span className="section-num">06</span> Contact</p>
           <h2 className="contact-heading">
             Let&rsquo;s<br />
             <span className="accent">Work</span><br />
             Together
           </h2>
           <p className="contact-desc">
-            Open to product roles, creative collaborations,
-            and interesting technical challenges.
+            Open to product roles, creative collaborations, and challenging
+            technical problems. If it ships and it matters, I&rsquo;m interested.
           </p>
           <div className="contact-links">
             <MagneticLink
               href="mailto:work.vanshbhardwaj@gmail.com"
               className="contact-link"
             >
-              Email
-            </MagneticLink>
-            <MagneticLink
-              href="https://github.com/Vansh-Bhardwaj"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="contact-link"
-            >
-              GitHub
+              work.vanshbhardwaj@gmail.com
             </MagneticLink>
             <MagneticLink
               href="https://www.linkedin.com/in/vansh-bhardwaj-780271221/"
@@ -76,7 +70,15 @@ export default function Contact() {
               LinkedIn
             </MagneticLink>
             <MagneticLink
-              href="https://twitter.com"
+              href="https://github.com/Vansh-Bhardwaj"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-link"
+            >
+              GitHub
+            </MagneticLink>
+            <MagneticLink
+              href="https://twitter.com/I_Am_VanshBh"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-link"

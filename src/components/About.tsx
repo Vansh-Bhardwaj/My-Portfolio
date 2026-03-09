@@ -1,4 +1,5 @@
 import { useInView } from '../hooks/useInView'
+import SkillPlayground from './SkillPlayground'
 
 const skills = [
   'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js',
@@ -16,16 +17,19 @@ export default function About() {
     <section id="about" className="section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">About</p>
+          <p className="section-label"><span className="section-num">01</span> About</p>
+
           <div className="about-grid">
             <div className="about-bio">
-              I&rsquo;m a software developer with a background in
-              Computer Science (Graphics &amp; Gaming) from <strong>UPES</strong>.
-              I ship fast &mdash; whether it&rsquo;s a product interface
-              at <strong>Simapt</strong>, a game on the Play Store through
-              {' '}<strong>AllVarity Studio</strong>, or an open-source tool
-              used by hundreds. My work sits at the intersection of
-              engineering, design, and interactive media.
+              I design and engineer software at the intersection of
+              performance, interactivity, and visual craft &mdash; from
+              scalable web platforms to real&#8209;time 3D environments
+              and shipped VR products. With a B.Tech in Computer Science
+              specializing in Graphics &amp; Gaming from <strong>UPES</strong>,
+              I bring a systems&#8209;level understanding of rendering pipelines,
+              interaction design, and frontend architecture. Every project I
+              take on ships with intention &mdash; optimized, accessible,
+              and built to last.
             </div>
             <div className="about-details">
               <div className="about-detail-item">
@@ -62,6 +66,8 @@ export default function About() {
               </span>
             ))}
           </div>
+
+          <SkillPlayground />
         </div>
       </div>
     </section>
