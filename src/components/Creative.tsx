@@ -10,6 +10,7 @@ interface CreativeProject {
   tech: string[]
   link?: { url: string; label: string }
   accent: string
+  span?: string
 }
 
 const creativeProjects: CreativeProject[] = [
@@ -23,6 +24,7 @@ const creativeProjects: CreativeProject[] = [
       label: 'View Media',
     },
     accent: '#6366F1',
+    span: 'wide',
   },
   {
     title: 'Chronicles of Eldoria',
@@ -43,17 +45,6 @@ const creativeProjects: CreativeProject[] = [
     accent: '#F59E0B',
   },
   {
-    title: '3D Assets & Environments',
-    category: '3D Modeling',
-    desc: 'High-fidelity product renders, detailed castle environments, campus visualizations, and weapon models delivered for games, marketing, and client presentations.',
-    tech: ['Blender', 'Texturing', 'Rendering'],
-    link: {
-      url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
-      label: 'View Media',
-    },
-    accent: '#8B5CF6',
-  },
-  {
     title: 'Custom Shader Systems',
     category: 'Real-Time Shaders',
     desc: 'Procedural water simulation, stylized toon shading, and GPU\u2011driven visual effects engineered for real-time performance in Unity.',
@@ -65,6 +56,17 @@ const creativeProjects: CreativeProject[] = [
     accent: '#14B8A6',
   },
   {
+    title: '3D Assets & Environments',
+    category: '3D Modeling',
+    desc: 'High-fidelity product renders, detailed castle environments, campus visualizations, and weapon models delivered for games, marketing, and client presentations.',
+    tech: ['Blender', 'Texturing', 'Rendering'],
+    link: {
+      url: 'https://www.linkedin.com/feed/update/urn:li:activity:7193489930717667328/',
+      label: 'View Media',
+    },
+    accent: '#8B5CF6',
+  },
+  {
     title: 'VR Temple Experience',
     category: 'Virtual Reality',
     desc: 'Fully immersive sacred architecture with interactive elements, volumetric lighting, and hand-modeled detail \u2014 optimized for standalone VR headsets.',
@@ -74,10 +76,11 @@ const creativeProjects: CreativeProject[] = [
       label: 'View Media',
     },
     accent: '#EC4899',
+    span: 'wide',
   },
 ]
 
-function TiltCard({ project }: { project: CreativeProject }) {
+function TiltCard({ project, index }: { project: CreativeProject; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null)
 
   const handleMove = useCallback((e: React.PointerEvent) => {
@@ -99,32 +102,34 @@ function TiltCard({ project }: { project: CreativeProject }) {
   return (
     <div
       ref={cardRef}
-      className="creative-card"
-      style={{ '--card-accent': project.accent } as React.CSSProperties}
+      className={`bento-card${project.span === 'wide' ? ' bento-wide' : ''}`}
+      style={{ '--card-accent': project.accent, animationDelay: `${index * 0.08}s` } as React.CSSProperties}
       onPointerMove={handleMove}
       onPointerLeave={handleLeave}
       onPointerEnter={handleEnter}
     >
-      <div className="creative-card-header">
-        <span className="creative-category">{project.category}</span>
+      <div className="bento-accent-bar" />
+      <span className="bento-num" aria-hidden>{String(index + 1).padStart(2, '0')}</span>
+      <div className="bento-content">
+        <span className="bento-category">{project.category}</span>
+        <h3 className="bento-title">{project.title}</h3>
+        <p className="bento-desc">{project.desc}</p>
+        <div className="bento-tech">
+          {project.tech.map((t) => (
+            <span key={t} className="bento-tag">{t}</span>
+          ))}
+        </div>
+        {project.link && (
+          <a
+            href={project.link.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bento-link"
+          >
+            {project.link.label} <ArrowIcon size={10} />
+          </a>
+        )}
       </div>
-      <h3 className="creative-card-title">{project.title}</h3>
-      <p className="creative-card-desc">{project.desc}</p>
-      <div className="creative-card-tech">
-        {project.tech.map((t) => (
-          <span key={t} className="creative-tech-tag">{t}</span>
-        ))}
-      </div>
-      {project.link && (
-        <a
-          href={project.link.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="creative-card-link"
-        >
-          {project.link.label} <ArrowIcon size={10} />
-        </a>
-      )}
     </div>
   )
 }
@@ -137,9 +142,9 @@ export default function Creative() {
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
           <p className="section-label"><span className="section-num">03</span> Game Dev &amp; VR / AR</p>
-          <div className="creative-grid">
-            {creativeProjects.map((project) => (
-              <TiltCard key={project.title} project={project} />
+          <div className="bento-grid">
+            {creativeProjects.map((project, i) => (
+              <TiltCard key={project.title} project={project} index={i} />
             ))}
           </div>
         </div>

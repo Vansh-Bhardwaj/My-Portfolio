@@ -1,11 +1,13 @@
 import { useInView } from '../hooks/useInView'
+import { haptic } from '../hooks/useHaptics'
 
 interface TimelineItem {
   period: string
-  tag?: string
+  current?: boolean
   title: string
   org: string
   desc: string
+  type: 'work' | 'edu'
 }
 
 interface EduProject {
@@ -14,40 +16,44 @@ interface EduProject {
   desc: string
 }
 
-const experience: TimelineItem[] = [
+const timeline: TimelineItem[] = [
   {
     period: 'Current',
-    tag: '2025',
+    current: true,
     title: 'Software Developer',
     org: 'Simapt',
     desc: 'Engineering product-focused web platforms with fast iteration cycles, component-driven architecture, and systems designed for long-term maintainability.',
+    type: 'work',
   },
   {
     period: '2025',
     title: 'Freelance Developer & Mentor',
     org: 'Independent \u00B7 Remote',
     desc: 'Led VR development for a medical-center walkthrough. Delivered custom shaders, real-time animations, and production 3D assets for a mobile game studio.',
+    type: 'work',
   },
   {
     period: 'Jun \u2013 Jul 2024',
     title: 'Software Developer',
     org: 'Phemsoft Software Pvt. Ltd. \u00B7 Dehradun',
     desc: 'Engineered a physics-based water simulation in Unity, cutting draw calls by 40% through batching optimizations and custom LOD strategies.',
+    type: 'work',
   },
   {
     period: 'May 2024',
     title: 'Gameplay Programmer',
     org: 'GameDept Technologies \u00B7 Rajasthan',
     desc: 'Developed responsive player-movement mechanics for a platformer and designed three levels with progressively complex gameplay challenges.',
+    type: 'work',
+  },
+  {
+    period: '2021 \u2013 2025',
+    title: 'B.Tech, Computer Science \u2014 Graphics & Gaming',
+    org: 'UPES \u2014 University of Petroleum & Energy Studies',
+    desc: 'Four-year specialization in real-time rendering, game engine architecture, shader programming, and interactive media. Graduated 2025.',
+    type: 'edu',
   },
 ]
-
-const education = {
-  period: '2021 \u2013 2025',
-  title: 'B.Tech, Computer Science \u2014 Graphics & Gaming',
-  org: 'UPES \u2014 University of Petroleum & Energy Studies',
-  desc: 'Four-year specialization in real-time rendering, game engine architecture, shader programming, and interactive media. Graduated 2025.',
-}
 
 const eduProjects: EduProject[] = [
   {
@@ -67,17 +73,36 @@ function TimelineEntry({ item, index }: { item: TimelineItem; index: number }) {
   return (
     <div
       ref={ref}
-      className={`timeline-item reveal ${isVisible ? 'visible' : ''}`}
-      style={{ transitionDelay: `${index * 0.08}s` }}
+      className={`tl-entry reveal ${isVisible ? 'visible' : ''}${item.current ? ' tl-current' : ''}${item.type === 'edu' ? ' tl-edu' : ''}`}
+      style={{ transitionDelay: `${index * 0.1}s` }}
+      onPointerEnter={() => haptic('light')}
     >
-      <div className="timeline-period">
-        {item.tag && <span className="timeline-tag">{item.tag}</span>}
-        <span>{item.period}</span>
+      <div className="tl-rail">
+        <span className={`tl-dot${item.current ? ' tl-dot-active' : ''}${item.type === 'edu' ? ' tl-dot-edu' : ''}`} />
       </div>
-      <div className="timeline-content">
-        <h3 className="timeline-title">{item.title}</h3>
-        <p className="timeline-org">{item.org}</p>
-        <p className="timeline-desc">{item.desc}</p>
+      <div className="tl-body">
+        <div className="tl-meta">
+          <span className="tl-period">{item.period}</span>
+          {item.current && <span className="tl-badge">Current</span>}
+          {item.type === 'edu' && <span className="tl-badge tl-badge-edu">Education</span>}
+        </div>
+        <h3 className="tl-title">{item.title}</h3>
+        <p className="tl-org">{item.org}</p>
+        <p className="tl-desc">{item.desc}</p>
+
+        {item.type === 'edu' && (
+          <div className="tl-projects">
+            {eduProjects.map((p) => (
+              <div key={p.title} className="tl-project">
+                <div className="tl-project-head">
+                  <span className="tl-project-title">{p.title}</span>
+                  <span className="tl-project-label">{p.label}</span>
+                </div>
+                <p className="tl-project-desc">{p.desc}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -85,7 +110,6 @@ function TimelineEntry({ item, index }: { item: TimelineItem; index: number }) {
 
 export default function Experience() {
   const { ref, isVisible } = useInView()
-  const { ref: eduRef, isVisible: eduVisible } = useInView(0.1)
 
   return (
     <section id="experience" className="section">
@@ -97,38 +121,10 @@ export default function Experience() {
           </p>
         </div>
 
-        <div className="timeline">
-          {experience.map((item, i) => (
+        <div className="tl-wrap">
+          {timeline.map((item, i) => (
             <TimelineEntry key={i} item={item} index={i} />
           ))}
-
-          <div
-            ref={eduRef}
-            className={`timeline-item timeline-edu reveal ${eduVisible ? 'visible' : ''}`}
-            style={{ transitionDelay: `${experience.length * 0.08}s` }}
-          >
-            <div className="timeline-period">
-              <span className="timeline-tag">Education</span>
-              <span>{education.period}</span>
-            </div>
-            <div className="timeline-content">
-              <h3 className="timeline-title">{education.title}</h3>
-              <p className="timeline-org">{education.org}</p>
-              <p className="timeline-desc">{education.desc}</p>
-
-              <div className="edu-projects">
-                {eduProjects.map((p) => (
-                  <div key={p.title} className="edu-project">
-                    <div className="edu-project-header">
-                      <span className="edu-project-title">{p.title}</span>
-                      <span className="edu-project-label">{p.label}</span>
-                    </div>
-                    <p className="edu-project-desc">{p.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
