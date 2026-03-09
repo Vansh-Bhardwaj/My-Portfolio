@@ -50,9 +50,16 @@ const creativeProjects: CreativeProject[] = [
   {
     title: '3D Assets & Models',
     category: '3D Modeling',
-    desc: 'Product renders, castle environments, campus scenes, and weapon models for games and marketing.',
+    desc: 'High-fidelity product renders, detailed castle environments, campus visualizations, and weapon models delivered for games, marketing, and client presentations.',
     tech: ['Blender', 'Texturing', 'Rendering'],
     accent: '#8B5CF6',
+  },
+  {
+    title: 'Custom Shader Systems',
+    category: 'Real-time Shaders',
+    desc: 'Procedural water simulation, stylized toon shading, and GPU\u2011driven visual effects engineered for real-time performance in Unity.',
+    tech: ['HLSL', 'Shader Graph', 'Unity'],
+    accent: '#14B8A6',
   },
   {
     title: 'VR Temple Experience',

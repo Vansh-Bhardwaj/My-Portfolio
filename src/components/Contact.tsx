@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useInView } from '../hooks/useInView'
+import { haptic } from '../hooks/useHaptics'
 
 function MagneticLink({ href, children, className = '', ...props }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
   const linkRef = useRef<HTMLAnchorElement>(null)
@@ -29,6 +30,7 @@ function MagneticLink({ href, children, className = '', ...props }: React.Anchor
       className={`magnetic ${className}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onClick={() => haptic('light')}
     >
       {children}
     </a>
@@ -76,7 +78,7 @@ export default function Contact() {
               LinkedIn
             </MagneticLink>
             <MagneticLink
-              href="https://twitter.com"
+              href="https://twitter.com/I_Am_VanshBh"
               target="_blank"
               rel="noopener noreferrer"
               className="contact-link"

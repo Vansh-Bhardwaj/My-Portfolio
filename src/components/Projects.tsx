@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useInView } from '../hooks/useInView'
 import ArrowIcon from './ArrowIcon'
+import { haptic } from '../hooks/useHaptics'
 
 interface Project {
   num: string
@@ -10,238 +12,289 @@ interface Project {
   url: string
   role: string
   tech: string[]
-  highlights: string[]
-  image: string
-  canIframe: boolean
-  iframeUrl?: string
+  gradient: string
+  accent: string
+  liveUrl?: string
+  forceDark?: boolean
 }
 
-const MOBILE_BREAKPOINT = 768
-
-function isMobileOrIOS(): boolean {
-  if (typeof navigator === 'undefined') return false
-  const ua = navigator.userAgent
-  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  const isMobile = /Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < MOBILE_BREAKPOINT
-  return isIOS || isMobile
-}
+const MOBILE_BP = 768
 
 const projects: Project[] = [
   {
     num: '01',
+    title: 'DebridUI',
+    subtitle: 'TypeScript \u00B7 Cloudflare Workers',
+    desc: 'A privacy-first debrid client I actively maintain. Built-in player, cross-device sync, subtitle support, and media discovery across Real-Debrid, TorBox, AllDebrid, and Premiumize \u2014 all edge-deployed on Cloudflare Workers.',
+    year: '2024 \u2013 Present',
+    url: 'https://debridui.viperadnan.com',
+    role: 'Creator & Active Maintainer',
+    tech: ['Next.js', 'TypeScript', 'Cloudflare Workers'],
+    gradient: 'linear-gradient(135deg, #0d0d0a 0%, #1a1810 50%, #252218 100%)',
+    accent: '#f5c518',
+    liveUrl: 'https://debridui.viperadnan.com',
+  },
+  {
+    num: '02',
     title: 'AllVarity Studio',
-    subtitle: 'Game Studio',
+    subtitle: 'Game Studio \u00B7 Brand Site',
     desc: 'Co-founded a game studio, built the brand site from scratch, and shipped our first title to the Play Store. The site runs on Next.js and doubles as the studio dashboard for managing releases, blog, and team.',
     year: '2024 \u2013 Present',
     url: 'https://allvaritygames.com',
     role: 'Co-Founder & Lead Developer',
     tech: ['Next.js', 'Unity', 'Game Dev'],
-    highlights: ['Published on Google Play', 'VR/AR Games', 'Studio Dashboard'],
-    image: '/preview-allvarity.webp',
-    canIframe: true,
-  },
-  {
-    num: '02',
-    title: 'DebridUI',
-    subtitle: 'Open Source',
-    desc: 'A privacy-first debrid client I actively maintain. Built-in player, cross-device sync, subtitle support, and media discovery across Real-Debrid, TorBox, AllDebrid, and Premiumize \u2014 all edge-deployed on Cloudflare Workers.',
-    year: '2026 \u2013 Present',
-    url: 'https://debridui.viperadnan.com',
-    role: 'Creator & Active Maintainer',
-    tech: ['Next.js', 'TypeScript', 'Cloudflare Workers'],
-    highlights: ['Built-in Player', 'Multi-provider', 'Privacy-first', 'Open Source'],
-    image: '/preview-debrid.webp',
-    canIframe: true,
+    gradient: 'linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #1e293b 100%)',
+    accent: '#4a9eff',
+    liveUrl: 'https://allvaritygames.com',
+    forceDark: true,
   },
   {
     num: '03',
     title: 'Centuary Sofas',
-    subtitle: 'Client Project \u00B7 Simapt',
-    desc: 'End-to-end e-commerce platform for India\u2019s leading mattress brand. Built the frontend, backend APIs, 3D product configurator with AR try-on, and managed hosting \u2014 letting customers visualize sofas in their own space before buying.',
+    subtitle: 'Product Web \u00B7 UI Engineering',
+    desc: 'End-to-end e-commerce platform for India\u2019s leading mattress brand. Built the frontend, backend APIs, 3D product configurator with AR try-on \u2014 letting customers visualize sofas in their own space before buying.',
     year: '2025',
     url: 'https://sofa.centuaryindia.com',
     role: 'Full-stack Developer at Simapt',
-    tech: ['React', 'TypeScript', '3D / AR', 'Node.js', 'E-commerce'],
-    highlights: ['3D Configurator', 'AR Try-on', 'Full-stack', 'Product Visualization'],
-    image: '/preview-centuary.webp',
-    canIframe: true,
-    iframeUrl: 'http://43.205.153.173/sofas',
+    tech: ['React', 'TypeScript', '3D / AR', 'Node.js'],
+    gradient: 'linear-gradient(135deg, #0a1628 0%, #172554 50%, #1e3a5f 100%)',
+    accent: '#3b82f6',
   },
 ]
 
-function getHostname(url: string): string {
-  try {
-    return new URL(url).hostname
-  } catch {
-    return url
-  }
-}
+/* ── Browser mockup with scroll-driven iframe panning ── */
 
-function LivePreview({ project, isActive }: { project: Project; isActive: boolean }) {
+function BrowserMockup({
+  project,
+  isVisible,
+  iframeRef,
+}: {
+  project: Project
+  isVisible: boolean
+  iframeRef: React.RefObject<HTMLIFrameElement>
+}) {
+  const viewportRef = useRef<HTMLDivElement>(null)
   const [iframeLoaded, setIframeLoaded] = useState(false)
+  const [isMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < MOBILE_BP,
+  )
   const [showIframe, setShowIframe] = useState(false)
-  const [isMobile] = useState(() => isMobileOrIOS())
-  const iframeRef = useRef<HTMLIFrameElement>(null)
 
-  const canShowIframe = project.canIframe && !isMobile
+  const canEmbed = !!project.liveUrl && !isMobile
 
   useEffect(() => {
-    if (isActive && canShowIframe && !showIframe) {
-      const timer = setTimeout(() => setShowIframe(true), 600)
-      return () => clearTimeout(timer)
+    if (isVisible && canEmbed && !showIframe) {
+      const t = setTimeout(() => setShowIframe(true), 500)
+      return () => clearTimeout(t)
     }
-  }, [isActive, canShowIframe, showIframe])
+  }, [isVisible, canEmbed, showIframe])
 
-  const handleIframeLoad = useCallback(() => {
-    const iframe = iframeRef.current
-    if (!iframe) return
-    // Delay check so the browser has time to settle after a potential X-Frame-Options block
-    setTimeout(() => {
-      try {
-        const loc = iframe.contentWindow?.location?.href
-        if (!loc || loc === 'about:blank') return
-      } catch {
-        // Cross-origin access error — external site loaded successfully
-      }
-      setIframeLoaded(true)
-    }, 200)
+  const handleLoad = useCallback(() => {
+    setTimeout(() => setIframeLoaded(true), 300)
   }, [])
 
-  const iframeSrc = project.iframeUrl || project.url
+  const displayUrl = project.url.replace(/^https?:\/\//, '')
 
   return (
-    <div className="project-preview">
-      <div className="browser-frame">
-        <div className="browser-bar">
-          <div className="browser-dots">
-            <span /><span /><span />
-          </div>
-          <div className="browser-url">{getHostname(project.url)}</div>
-          {canShowIframe && iframeLoaded && (
-            <span className="browser-live-badge">LIVE</span>
-          )}
+    <div className="project-browser">
+      <div className="browser-chrome">
+        <div className="browser-dots">
+          <span />
+          <span />
+          <span />
         </div>
-        <a
-          href={project.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="browser-viewport"
-        >
-          <img
-            src={project.image}
-            alt={`${project.title} preview`}
-            className="browser-screenshot"
-            loading="lazy"
-          />
-          {canShowIframe && showIframe && (
-            <iframe
-              ref={iframeRef}
-              src={iframeSrc}
-              title={`${project.title} live preview`}
-              className={`browser-iframe ${iframeLoaded ? 'loaded' : ''}`}
-              loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-popups"
-              onLoad={handleIframeLoad}
+        <div className="browser-address-bar">
+          <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden>
+            <rect x="1" y="5" width="8" height="6" rx="1" stroke="#555" strokeWidth="1.2" />
+            <path
+              d="M3 5V3.5a2.5 2.5 0 015 0V5"
+              stroke="#555"
+              strokeWidth="1.2"
+              strokeLinecap="round"
             />
-          )}
-          <div className="browser-overlay">
-            <span>Visit Site</span>
-            <ArrowIcon size={14} />
+          </svg>
+          <span>{displayUrl}</span>
+        </div>
+        {canEmbed && showIframe && iframeLoaded && (
+          <span className="browser-live-badge">LIVE</span>
+        )}
+      </div>
+
+      <div
+        ref={viewportRef}
+        className="browser-viewport"
+        style={
+          {
+            '--project-gradient': project.gradient,
+            '--project-accent': project.accent,
+          } as React.CSSProperties
+        }
+      >
+        {/* gradient fallback — always rendered */}
+        <div className="browser-fallback">
+          <div className="browser-fallback-grid" />
+          <div className="browser-fallback-shapes">
+            <span className="shape shape-rect-1" />
+            <span className="shape shape-rect-2" />
+            <span className="shape shape-circle" />
+            <span className="shape shape-line-1" />
+            <span className="shape shape-line-2" />
+            <span className="shape shape-dot-1" />
+            <span className="shape shape-dot-2" />
+            <span className="shape shape-dot-3" />
           </div>
-        </a>
+        </div>
+
+        {canEmbed && showIframe && (
+          <iframe
+            ref={iframeRef}
+            src={project.liveUrl}
+            title={`${project.title} \u2014 live preview`}
+            className={`browser-iframe${iframeLoaded ? ' loaded' : ''}${project.forceDark ? ' force-dark' : ''}`}
+            loading="lazy"
+            sandbox="allow-scripts allow-same-origin"
+            scrolling="no"
+            onLoad={handleLoad}
+          />
+        )}
       </div>
     </div>
   )
 }
 
-export default function Projects() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [activeIndex, setActiveIndex] = useState(0)
+/* ── Individual showcase section per project ── */
 
+const SCROLL_VH = 250 // total height of scroll container (in vh) for iframe projects
+
+function ProjectShowcase({ project }: { project: Project }) {
+  const { ref, isVisible } = useInView<HTMLDivElement>(0.05)
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const hasLive = !!project.liveUrl
+  const [isMobile] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth < MOBILE_BP,
+  )
+
+  /* scroll-driven effect: subtle zoom + progress while pinned */
   useEffect(() => {
-    const handleScroll = () => {
-      const el = containerRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      const totalScroll = rect.height - window.innerHeight
-      if (totalScroll <= 0) return
+    const container = scrollRef.current
+    if (!container || isMobile) return
 
-      const scrolled = -rect.top
-      const progress = Math.max(0, Math.min(0.999, scrolled / totalScroll))
-      const index = Math.floor(progress * projects.length)
-      setActiveIndex(Math.max(0, Math.min(index, projects.length - 1)))
+    let rafId: number
+    const onScroll = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        const rect = container.getBoundingClientRect()
+        const vh = window.innerHeight
+        const scrolled = -rect.top
+        const scrollRange = container.offsetHeight - vh
+        if (scrollRange <= 0) return
+        const progress = Math.max(0, Math.min(1, scrolled / scrollRange))
+
+        // subtle zoom on iframe
+        if (iframeRef.current) {
+          const scale = 1 + progress * 0.04
+          iframeRef.current.style.transform = `scale(${scale})`
+        }
+
+        // update scroll progress bar
+        container.style.setProperty('--scroll-progress', `${progress * 100}%`)
+      })
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    handleScroll()
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(rafId)
+    }
+  }, [isMobile])
+
+  const showScrollLock = hasLive && !isMobile
 
   return (
-    <section
-      id="work"
-      ref={containerRef}
-      className="projects-section"
-      style={{ height: `${projects.length * 100}vh` }}
+    <div
+      ref={showScrollLock ? scrollRef : undefined}
+      className={`project-showcase${showScrollLock ? ' has-scroll-lock' : ''}`}
+      style={
+        {
+          '--project-accent': project.accent,
+          ...(showScrollLock ? { height: `${SCROLL_VH}vh` } : {}),
+        } as React.CSSProperties
+      }
     >
-      <div className="projects-sticky">
-        <div className="projects-header">
-          <p className="section-label">Projects</p>
-          <span className="projects-counter">
-            {String(activeIndex + 1).padStart(2, '0')} / {String(projects.length).padStart(2, '0')}
-          </span>
+      <div
+        ref={ref}
+        className={`project-showcase-inner${isVisible ? ' in-view' : ''}${showScrollLock ? ' scroll-sticky' : ''}`}
+      >
+        <span className="project-num-ghost" aria-hidden>
+          {project.num}
+        </span>
+
+        {/* scroll progress indicator */}
+        {showScrollLock && <div className="scroll-progress" />}
+
+        {/* header */}
+        <div className="project-header">
+          <div className="project-header-top">
+            <span className="project-num">{project.num}</span>
+            <span className="project-header-divider" />
+            <span className="project-role">{project.role}</span>
+          </div>
+          <h3 className="project-name">{project.title}</h3>
+          <p className="project-type">{project.subtitle}</p>
         </div>
 
-        <div className="projects-content">
-          {projects.map((project, i) => (
-            <div
-              key={project.num}
-              className={`project-slide ${i === activeIndex ? 'active' : ''}`}
+        {/* browser mockup */}
+        <BrowserMockup project={project} isVisible={isVisible} iframeRef={iframeRef} />
+
+        {/* footer */}
+        <div className="project-footer">
+          <p className="project-desc">{project.desc}</p>
+          <div className="project-tags">
+            {project.tech.map((t) => (
+              <span key={t} className="project-tag">
+                {t}
+              </span>
+            ))}
+          </div>
+          <div className="project-footer-row">
+            <span className="project-year">{project.year}</span>
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="project-visit"
+              onClick={(e) => {
+                e.stopPropagation()
+                haptic('medium')
+              }}
             >
-              <LivePreview project={project} isActive={i === activeIndex} />
-              <div className="project-details">
-                <span className="project-slide-num">{project.num}</span>
-                <h3 className="project-slide-title">{project.title}</h3>
-                <p className="project-slide-subtitle">{project.subtitle}</p>
-                <p className="project-slide-desc">{project.desc}</p>
-                <div className="project-highlights">
-                  {project.highlights.map((h) => (
-                    <span key={h} className="highlight-tag">{h}</span>
-                  ))}
-                </div>
-                <div className="project-slide-info">
-                  <div>
-                    <span className="info-label">Role</span>
-                    <span className="info-value">{project.role}</span>
-                  </div>
-                  <div>
-                    <span className="info-label">Stack</span>
-                    <span className="info-value">{project.tech.join(' \u00B7 ')}</span>
-                  </div>
-                  <div>
-                    <span className="info-label">Year</span>
-                    <span className="info-value">{project.year}</span>
-                  </div>
-                </div>
-                <a
-                  href={project.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="project-visit-btn"
-                >
-                  Visit Live Site <ArrowIcon />
-                </a>
-              </div>
-            </div>
-          ))}
+              Visit Site <ArrowIcon size={14} />
+            </a>
+          </div>
         </div>
+      </div>
+    </div>
+  )
+}
 
-        <div className="projects-progress-track">
-          <div
-            className="projects-progress-fill"
-            style={{ transform: `scaleX(${(activeIndex + 1) / projects.length})` }}
-          />
+/* ── Section wrapper ── */
+
+export default function Projects() {
+  const { ref, isVisible } = useInView()
+
+  return (
+    <section id="work" className="section">
+      <div className="container">
+        <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
+          <p className="section-label">Selected Work</p>
         </div>
+      </div>
+      <div className="project-list">
+        {projects.map((p) => (
+          <ProjectShowcase key={p.num} project={p} />
+        ))}
       </div>
     </section>
   )

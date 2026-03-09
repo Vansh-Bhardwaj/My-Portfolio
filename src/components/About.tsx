@@ -6,6 +6,12 @@ const skills = [
   'Cloudflare Workers', 'GSAP', 'Blender', 'Vuforia',
 ]
 
+const stats = [
+  { value: '6+', label: 'Products Shipped' },
+  { value: '5+', label: 'Companies Worked With' },
+  { value: '4', label: 'Disciplines' },
+]
+
 const manifesto = 'I care about craft, speed, and shipping things that actually work.'
 
 export default function About() {
@@ -17,15 +23,25 @@ export default function About() {
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
           <p className="section-label">About</p>
+
+          <div className="about-stats">
+            {stats.map((s) => (
+              <div key={s.label} className="about-stat">
+                <span className="about-stat-value">{s.value}</span>
+                <span className="about-stat-label">{s.label}</span>
+              </div>
+            ))}
+          </div>
+
           <div className="about-grid">
             <div className="about-bio">
-              I&rsquo;m a software developer with a background in
-              Computer Science (Graphics &amp; Gaming) from <strong>UPES</strong>.
-              I ship fast &mdash; whether it&rsquo;s a product interface
-              at <strong>Simapt</strong>, a game on the Play Store through
-              {' '}<strong>AllVarity Studio</strong>, or an open-source tool
-              used by hundreds. My work sits at the intersection of
-              engineering, design, and interactive media.
+              I design and engineer software at the intersection of
+              performance, interactivity, and visual craft &mdash; from
+              scalable web platforms to real&#8209;time 3D environments
+              and shipped VR products. With a B.Tech in Computer Science
+              specializing in Graphics &amp; Gaming from <strong>UPES</strong>,
+              I bring a systems&#8209;level understanding of rendering pipelines,
+              interaction design, and frontend architecture.
             </div>
             <div className="about-details">
               <div className="about-detail-item">

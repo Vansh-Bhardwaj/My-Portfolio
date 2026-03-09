@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { haptic } from '../hooks/useHaptics'
 
 function SplitLine({ text, baseDelay, className = '' }: { text: string; baseDelay: number; className?: string }) {
   return (
@@ -60,6 +61,7 @@ export default function Hero() {
 
   const go = (e: React.MouseEvent<HTMLAnchorElement>, target: string) => {
     e.preventDefault()
+    haptic('light')
     const el = document.querySelector(target)
     if (el) {
       window.scrollTo({ top: (el as HTMLElement).offsetTop })
