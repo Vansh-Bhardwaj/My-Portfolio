@@ -1,16 +1,10 @@
 import { useInView } from '../hooks/useInView'
-import SkillConstellation from './SkillConstellation'
+import SkillPlayground from './SkillPlayground'
 
 const skills = [
   'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js',
   'Unity', 'C#', 'Python', 'HLSL / GLSL',
   'Cloudflare Workers', 'GSAP', 'Blender', 'Vuforia',
-]
-
-const stats = [
-  { value: '12', label: 'Products Shipped' },
-  { value: '4', label: 'Companies Worked With' },
-  { value: '5', label: 'Disciplines' },
 ]
 
 const manifesto = 'I care about craft, speed, and shipping things that actually work.'
@@ -24,15 +18,6 @@ export default function About() {
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
           <p className="section-label">About</p>
-
-          <div className="about-stats">
-            {stats.map((s) => (
-              <div key={s.label} className="about-stat">
-                <span className="about-stat-value">{s.value}</span>
-                <span className="about-stat-label">{s.label}</span>
-              </div>
-            ))}
-          </div>
 
           <div className="about-grid">
             <div className="about-bio">
@@ -82,7 +67,7 @@ export default function About() {
             ))}
           </div>
 
-          <SkillConstellation />
+          <SkillPlayground />
         </div>
       </div>
     </section>
