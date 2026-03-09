@@ -11,8 +11,9 @@ interface Project {
   url: string
   role: string
   tech: string[]
-  gradient: string
   accent: string
+  screenshot: string
+  screenshotFull: string
 }
 
 const projects: Project[] = [
@@ -25,8 +26,9 @@ const projects: Project[] = [
     url: 'https://sofa.centuaryindia.com',
     role: 'Full-stack Developer at Simapt',
     tech: ['React', 'TypeScript', '3D / AR', 'Node.js', 'E-commerce'],
-    gradient: 'linear-gradient(135deg, #0a1628 0%, #172554 50%, #1e3a5f 100%)',
-    accent: '#3b82f6',
+    accent: '#1a8a8a',
+    screenshot: '/projects/centuary-sofas.webp',
+    screenshotFull: '/projects/centuary-sofas-full.webp',
   },
   {
     num: '02',
@@ -37,8 +39,9 @@ const projects: Project[] = [
     url: 'https://debridui.viperadnan.com',
     role: 'Creator & Active Maintainer',
     tech: ['Next.js', 'TypeScript', 'Cloudflare Workers'],
-    gradient: 'linear-gradient(135deg, #0d0d0a 0%, #1a1810 50%, #252218 100%)',
-    accent: '#f5c518',
+    accent: '#FFC107',
+    screenshot: '/projects/debridui.webp',
+    screenshotFull: '/projects/debridui-full.webp',
   },
   {
     num: '03',
@@ -49,10 +52,43 @@ const projects: Project[] = [
     url: 'https://allvaritygames.com',
     role: 'Co-Founder & Lead Developer',
     tech: ['Next.js', 'Unity', 'Game Dev'],
-    gradient: 'linear-gradient(135deg, #0a0e1a 0%, #111827 50%, #1e293b 100%)',
-    accent: '#4a9eff',
+    accent: '#2563EB',
+    screenshot: '/projects/allvarity-studio.webp',
+    screenshotFull: '/projects/allvarity-studio-full.webp',
   },
 ]
+
+function BrowserMockup({ project }: { project: Project }) {
+  const displayUrl = project.url.replace(/^https?:\/\//, '')
+
+  return (
+    <div className="project-browser">
+      <div className="browser-chrome">
+        <div className="browser-dots">
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="browser-address-bar">
+          <svg width="10" height="12" viewBox="0 0 10 12" fill="none" aria-hidden>
+            <rect x="1" y="5" width="8" height="6" rx="1" stroke="#555" strokeWidth="1.2" />
+            <path d="M3 5V3.5a2.5 2.5 0 015 0V5" stroke="#555" strokeWidth="1.2" strokeLinecap="round" />
+          </svg>
+          <span>{displayUrl}</span>
+        </div>
+      </div>
+      <div className="browser-viewport">
+        <img
+          src={project.screenshotFull}
+          alt={`${project.title} \u2014 website preview`}
+          className="browser-screenshot"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    </div>
+  )
+}
 
 function ProjectCard({ project }: { project: Project }) {
   const { ref, isVisible } = useInView<HTMLDivElement>(0.1)
@@ -61,12 +97,7 @@ function ProjectCard({ project }: { project: Project }) {
     <div
       ref={ref}
       className={`project-card${isVisible ? ' in-view' : ''}`}
-      style={
-        {
-          '--project-accent': project.accent,
-          '--project-gradient': project.gradient,
-        } as React.CSSProperties
-      }
+      style={{ '--project-accent': project.accent } as React.CSSProperties}
     >
       <span className="project-num-ghost" aria-hidden>
         {project.num}
@@ -82,24 +113,7 @@ function ProjectCard({ project }: { project: Project }) {
         <p className="project-type">{project.subtitle}</p>
       </div>
 
-      <div className="project-visual">
-        <div className="project-visual-gradient">
-          <div className="project-visual-grid" />
-          <div className="project-visual-shapes">
-            <span className="pv-shape pv-ring" />
-            <span className="pv-shape pv-bar-1" />
-            <span className="pv-shape pv-bar-2" />
-            <span className="pv-shape pv-dot-1" />
-            <span className="pv-shape pv-dot-2" />
-            <span className="pv-shape pv-dot-3" />
-            <span className="pv-shape pv-line" />
-            <span className="pv-shape pv-block" />
-          </div>
-          <div className="project-visual-title" aria-hidden>
-            {project.title}
-          </div>
-        </div>
-      </div>
+      <BrowserMockup project={project} />
 
       <div className="project-card-footer">
         <p className="project-desc">{project.desc}</p>
