@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { useInView } from '../hooks/useInView'
 import ArrowIcon from './ArrowIcon'
 import { haptic } from '../hooks/useHaptics'
@@ -90,6 +91,27 @@ function BrowserMockup({ project }: { project: Project }) {
 
 function ProjectCard({ project }: { project: Project }) {
   const { ref, isVisible } = useInView<HTMLDivElement>(0.1)
+  const ghostRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const el = ghostRef.current?.parentElement
+    if (!el) return
+    let rafId: number
+    const onScroll = () => {
+      cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect()
+        const vh = window.innerHeight
+        const progress = (vh - rect.top) / (vh + rect.height)
+        const offset = (progress - 0.5) * -60
+        if (ghostRef.current) {
+          ghostRef.current.style.transform = `translateY(${offset}px)`
+        }
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(rafId) }
+  }, [])
 
   return (
     <div
@@ -97,7 +119,7 @@ function ProjectCard({ project }: { project: Project }) {
       className={`project-card${isVisible ? ' in-view' : ''}`}
       style={{ '--project-accent': project.accent } as React.CSSProperties}
     >
-      <span className="project-num-ghost" aria-hidden>
+      <span className="project-num-ghost" ref={ghostRef} aria-hidden>
         {project.num}
       </span>
 
@@ -149,7 +171,7 @@ export default function Projects() {
     <section id="work" className="section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">Selected Work</p>
+          <p className="section-label"><span className="section-num">02</span> Selected Work</p>
         </div>
       </div>
       <div className="project-list">

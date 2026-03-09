@@ -52,6 +52,11 @@
   gap: 12px;
 }
 
+.section-num {
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
 .section-label::before {
   content: '';
   display: block;
@@ -480,14 +485,30 @@ button:hover .arrow-icon {
   padding: 5px 12px;
   border: 1px solid var(--border);
   transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+  animation: cardStagger 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+.skill-tag:nth-child(1) { animation-delay: 0.3s; }
+.skill-tag:nth-child(2) { animation-delay: 0.36s; }
+.skill-tag:nth-child(3) { animation-delay: 0.42s; }
+.skill-tag:nth-child(4) { animation-delay: 0.48s; }
+.skill-tag:nth-child(5) { animation-delay: 0.54s; }
+.skill-tag:nth-child(6) { animation-delay: 0.6s; }
+.skill-tag:nth-child(7) { animation-delay: 0.66s; }
+.skill-tag:nth-child(8) { animation-delay: 0.72s; }
+.skill-tag:nth-child(9) { animation-delay: 0.78s; }
+.skill-tag:nth-child(10) { animation-delay: 0.84s; }
+.skill-tag:nth-child(11) { animation-delay: 0.9s; }
+.skill-tag:nth-child(12) { animation-delay: 0.96s; }
+.skill-tag:nth-child(13) { animation-delay: 1.02s; }
+.skill-tag:nth-child(n+14) { animation-delay: 1.08s; }
 
 .skill-tag:hover {
   border-color: var(--accent);
   color: var(--accent);
 }
 
-/* ===== Skill Playground ===== */
+/* ===== Skill Breakout Game ===== */
 
 .playground-wrapper {
   margin-top: 40px;
@@ -495,30 +516,92 @@ button:hover .arrow-icon {
   border-top: 1px solid var(--border);
 }
 
+.playground-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  min-height: 20px;
+}
+
+.playground-score {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.playground-lives {
+  display: flex;
+  gap: 6px;
+}
+
+.playground-heart {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
 .playground-canvas-wrap {
+  position: relative;
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
+  border: 1px solid var(--border);
   touch-action: none;
-  cursor: grab;
-}
-
-.playground-canvas-wrap:active {
-  cursor: grabbing;
+  cursor: none;
 }
 
 .playground-canvas {
   display: block;
 }
 
+.playground-start {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.playground-start:hover {
+  background: rgba(10, 10, 10, 0.5);
+}
+
+.playground-start-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.playground-start-sub {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
 .playground-hint {
-  margin-top: 10px;
+  margin-top: 8px;
   font-size: 0.625rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--text-muted);
-  opacity: 0.4;
+  opacity: 0.5;
+  text-align: center;
 }
 
 /* (stats section removed) */
@@ -555,6 +638,7 @@ button:hover .arrow-icon {
   pointer-events: none;
   user-select: none;
   letter-spacing: -0.06em;
+  will-change: transform;
 }
 
 /* stagger reveal */
@@ -824,12 +908,26 @@ button:hover .arrow-icon {
   padding: clamp(24px, 3vw, 36px);
   display: flex;
   flex-direction: column;
-  transition: border-color 0.3s ease, transform 0.3s ease;
+  transition: border-color 0.3s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  will-change: transform;
+  animation: cardStagger 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.creative-card:nth-child(1) { animation-delay: 0s; }
+.creative-card:nth-child(2) { animation-delay: 0.08s; }
+.creative-card:nth-child(3) { animation-delay: 0.16s; }
+.creative-card:nth-child(4) { animation-delay: 0.24s; }
+.creative-card:nth-child(5) { animation-delay: 0.32s; }
+.creative-card:nth-child(6) { animation-delay: 0.4s; }
+
+@keyframes cardStagger {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .creative-card:hover {
   border-color: var(--card-accent, var(--accent));
-  transform: translateY(-4px);
+  box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
 }
 
 .creative-card-header {
@@ -991,6 +1089,7 @@ button:hover .arrow-icon {
 }
 
 .timeline-item {
+  position: relative;
   display: grid;
   grid-template-columns: 200px 1fr;
   gap: clamp(24px, 4vw, 56px);
@@ -1019,6 +1118,29 @@ button:hover .arrow-icon {
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--accent);
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: clamp(24px, 3vh, 36px);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.timeline-item.visible::before {
+  opacity: 1;
+  animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 77, 0, 0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(255, 77, 0, 0); }
 }
 
 .timeline-title {
@@ -1128,6 +1250,7 @@ button:hover .arrow-icon {
   color: var(--accent);
   border-color: var(--accent);
   transform: translateX(4px);
+  text-shadow: 0 0 20px rgba(255, 77, 0, 0.15);
 }
 
 /* ===== Responsive — Tablet (1024px) ===== */
@@ -1391,8 +1514,8 @@ button:hover .arrow-icon {
     padding-top: 24px;
   }
 
-  .playground-hint {
-    display: none;
+  .playground-canvas-wrap {
+    cursor: default;
   }
 }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { haptic } from '../hooks/useHaptics'
 
 const SKILLS = [
@@ -6,50 +6,125 @@ const SKILLS = [
   { label: 'Next.js', cat: 0 },
   { label: 'TypeScript', cat: 0 },
   { label: 'Node.js', cat: 0 },
+  { label: 'GSAP', cat: 0 },
+  { label: 'Cloudflare', cat: 0 },
+  { label: 'Three.js', cat: 0 },
   { label: 'Unity', cat: 1 },
   { label: 'C#', cat: 1 },
   { label: 'GLSL', cat: 1 },
   { label: 'Blender', cat: 1 },
-  { label: 'Python', cat: 2 },
-  { label: 'GSAP', cat: 0 },
-  { label: 'Cloudflare', cat: 0 },
-  { label: 'Three.js', cat: 0 },
   { label: 'WebGL', cat: 1 },
-  { label: 'Vuforia', cat: 1 },
+  { label: 'Python', cat: 2 },
+  { label: 'Vuforia', cat: 2 },
 ]
 
 const CAT_COLORS = ['#FF4D00', '#6366F1', '#14B8A6']
-const GRAVITY = 0.35
-const BOUNCE = 0.55
-const FRICTION = 0.985
-const THROW_SCALE = 0.8
 
-interface Body {
-  x: number; y: number
-  vx: number; vy: number
-  w: number; h: number
-  label: string; color: string
-  angle: number; va: number
+interface Brick {
+  x: number; y: number; w: number; h: number
+  label: string; color: string; alive: boolean
 }
+
+interface Spark {
+  x: number; y: number; vx: number; vy: number
+  life: number; color: string; r: number
+}
+
+const BALL_R = 5
+const PADDLE_H = 10
+const BRICK_H = 26
+const BRICK_PAD = 4
 
 export default function SkillPlayground() {
   const wrapRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const bodies = useRef<Body[]>([])
+  const [score, setScore] = useState(0)
+  const [lives, setLives] = useState(3)
+  const [started, setStarted] = useState(false)
+  const [won, setWon] = useState(false)
+  const [paused, setPaused] = useState(false)
+  const [gameOver, setGameOver] = useState(false)
   const dims = useRef({ w: 0, h: 0 })
-  const drag = useRef<{
-    idx: number; offX: number; offY: number
-    lastX: number; lastY: number; lastT: number
-  } | null>(null)
-  const inited = useRef(false)
+  const bricks = useRef<Brick[]>([])
+  const sparks = useRef<Spark[]>([])
+  const visible = useRef(true)
+  const pointerInside = useRef(false)
+  const accentCache = useRef('#FF4D00')
+  const state = useRef({
+    ballX: 0, ballY: 0, bvx: 0, bvy: 0,
+    paddleX: 0, paddleW: 100,
+    running: false, launched: false,
+  })
 
-  const measure = useCallback((ctx: CanvasRenderingContext2D) => {
-    const font = '600 12px "Space Grotesk", sans-serif'
-    ctx.font = font
-    return SKILLS.map(s => {
-      const m = ctx.measureText(s.label)
-      return { ...s, tw: m.width }
+  const resetBall = useCallback(() => {
+    const { w, h } = dims.current
+    const s = state.current
+    s.ballX = w / 2
+    s.ballY = h - 30 - BALL_R
+    s.bvx = 0
+    s.bvy = 0
+    s.paddleX = w / 2
+    s.launched = false
+  }, [])
+
+  const buildBricks = useCallback((ctx: CanvasRenderingContext2D) => {
+    const { w } = dims.current
+    ctx.font = '600 11px "Space Grotesk", sans-serif'
+    const margin = 8
+    const rows: Brick[][] = []
+    let row: Brick[] = []
+    let cx = margin
+
+    SKILLS.forEach((s) => {
+      const tw = ctx.measureText(s.label).width
+      const bw = tw + 20
+      if (cx + bw + margin > w && row.length > 0) {
+        rows.push(row)
+        row = []
+        cx = margin
+      }
+      row.push({
+        x: cx, y: 0, w: bw, h: BRICK_H,
+        label: s.label, color: CAT_COLORS[s.cat], alive: true,
+      })
+      cx += bw + BRICK_PAD
     })
+    if (row.length) rows.push(row)
+
+    const topPad = 12
+    rows.forEach((r, ri) => {
+      const totalW = r.reduce((a, b) => a + b.w, 0) + (r.length - 1) * BRICK_PAD
+      let sx = (w - totalW) / 2
+      r.forEach((b) => {
+        b.x = sx
+        b.y = topPad + ri * (BRICK_H + BRICK_PAD)
+        sx += b.w + BRICK_PAD
+      })
+    })
+
+    bricks.current = rows.flat()
+  }, [])
+
+  const startGame = useCallback(() => {
+    setStarted(true)
+    setScore(0)
+    setLives(3)
+    setWon(false)
+    setGameOver(false)
+    setPaused(false)
+    state.current.running = true
+    sparks.current = []
+    haptic('medium')
+  }, [])
+
+  const launch = useCallback(() => {
+    if (state.current.launched) return
+    state.current.launched = true
+    const speed = 4
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.6
+    state.current.bvx = Math.cos(angle) * speed
+    state.current.bvy = Math.sin(angle) * speed
+    haptic('light')
   }, [])
 
   useEffect(() => {
@@ -59,36 +134,12 @@ export default function SkillPlayground() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const init = () => {
-      const { w } = dims.current
-      if (w === 0 || inited.current) return
-      const measured = measure(ctx)
-      const arr: Body[] = measured.map((s, i) => {
-        const bw = s.tw + 24
-        const bh = 30
-        const cols = 5
-        const gapX = w / (cols + 1)
-        const row = Math.floor(i / cols)
-        const col = i % cols
-        return {
-          x: gapX * (col + 1) + (Math.random() - 0.5) * 20,
-          y: -40 - row * 50 - Math.random() * 60,
-          vx: (Math.random() - 0.5) * 2,
-          vy: 0,
-          w: bw, h: bh,
-          label: s.label,
-          color: CAT_COLORS[s.cat],
-          angle: 0, va: (Math.random() - 0.5) * 0.02,
-        }
-      })
-      bodies.current = arr
-      inited.current = true
-    }
+    accentCache.current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#FF4D00'
 
     const resize = () => {
       const rect = wrap.getBoundingClientRect()
       const w = Math.round(rect.width)
-      const h = Math.min(340, Math.max(200, Math.round(w / 3.5)))
+      const h = Math.min(320, Math.max(220, Math.round(w / 3.2)))
       dims.current = { w, h }
       const dpr = Math.min(devicePixelRatio, 2)
       canvas.width = w * dpr
@@ -96,161 +147,218 @@ export default function SkillPlayground() {
       canvas.style.width = w + 'px'
       canvas.style.height = h + 'px'
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      init()
+      state.current.paddleW = Math.max(60, w * 0.1)
+      buildBricks(ctx)
+      resetBall()
     }
 
     resize()
     const ro = new ResizeObserver(resize)
     ro.observe(wrap)
 
-    const getPointer = (e: PointerEvent | Touch): [number, number] => {
+    const io = new IntersectionObserver(([e]) => {
+      visible.current = e.isIntersecting
+      if (!e.isIntersecting && state.current.running && state.current.launched) {
+        setPaused(true)
+      }
+    }, { threshold: 0.1 })
+    io.observe(canvas)
+
+    const onPointerMove = (e: PointerEvent) => {
       const rect = canvas.getBoundingClientRect()
-      return [e.clientX - rect.left, e.clientY - rect.top]
+      state.current.paddleX = e.clientX - rect.left
     }
-
-    const hitTest = (px: number, py: number): number => {
-      for (let i = bodies.current.length - 1; i >= 0; i--) {
-        const b = bodies.current[i]
-        if (px >= b.x - b.w / 2 && px <= b.x + b.w / 2 &&
-            py >= b.y - b.h / 2 && py <= b.y + b.h / 2) return i
-      }
-      return -1
+    const onPointerEnter = () => {
+      pointerInside.current = true
+      setPaused(false)
     }
-
-    const onDown = (e: PointerEvent) => {
-      const [px, py] = getPointer(e)
-      const idx = hitTest(px, py)
-      if (idx >= 0) {
-        canvas.setPointerCapture(e.pointerId)
-        const b = bodies.current[idx]
-        drag.current = {
-          idx, offX: px - b.x, offY: py - b.y,
-          lastX: px, lastY: py, lastT: performance.now(),
-        }
-        b.vx = 0; b.vy = 0; b.va = 0
-        haptic('light')
+    const onPointerLeave = () => {
+      pointerInside.current = false
+      if (state.current.running && state.current.launched) {
+        setPaused(true)
       }
     }
-
-    const onMove = (e: PointerEvent) => {
-      if (!drag.current) return
-      const [px, py] = getPointer(e)
-      const b = bodies.current[drag.current.idx]
-      b.x = px - drag.current.offX
-      b.y = py - drag.current.offY
-      drag.current.lastX = px
-      drag.current.lastY = py
-      drag.current.lastT = performance.now()
+    const onTouch = (e: TouchEvent) => {
+      e.preventDefault()
+      const rect = canvas.getBoundingClientRect()
+      state.current.paddleX = e.touches[0].clientX - rect.left
+    }
+    const onTouchStart = () => {
+      pointerInside.current = true
+      setPaused(false)
+    }
+    const onTouchEnd = () => { pointerInside.current = false }
+    const onClick = () => {
+      if (state.current.running && !state.current.launched) launch()
     }
 
-    const onUp = (e: PointerEvent) => {
-      if (!drag.current) return
-      const [px, py] = getPointer(e)
-      const dt = Math.max(1, performance.now() - drag.current.lastT)
-      const b = bodies.current[drag.current.idx]
-      b.vx = ((px - drag.current.lastX) / dt) * 16 * THROW_SCALE
-      b.vy = ((py - drag.current.lastY) / dt) * 16 * THROW_SCALE
-      b.va = b.vx * 0.01
-      drag.current = null
-      haptic('medium')
-    }
-
-    canvas.addEventListener('pointerdown', onDown)
-    canvas.addEventListener('pointermove', onMove)
-    canvas.addEventListener('pointerup', onUp)
-    canvas.addEventListener('pointercancel', () => { drag.current = null })
+    canvas.addEventListener('pointermove', onPointerMove)
+    canvas.addEventListener('pointerenter', onPointerEnter)
+    canvas.addEventListener('pointerleave', onPointerLeave)
+    canvas.addEventListener('touchmove', onTouch, { passive: false })
+    canvas.addEventListener('touchstart', onTouchStart, { passive: true })
+    canvas.addEventListener('touchend', onTouchEnd)
+    canvas.addEventListener('click', onClick)
 
     let rafId: number
 
     const loop = () => {
       const { w, h } = dims.current
-      const bs = bodies.current
+      const s = state.current
+      const sp = sparks.current
+      const bs = bricks.current
+      const accent = accentCache.current
+      const isPaused = !visible.current || !pointerInside.current
 
       ctx.clearRect(0, 0, w, h)
 
-      // floor line
-      ctx.strokeStyle = '#1e1e1e'
+      ctx.strokeStyle = '#1a1a1a'
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(0, h - 1)
       ctx.lineTo(w, h - 1)
       ctx.stroke()
 
-      for (let i = 0; i < bs.length; i++) {
-        const b = bs[i]
-        const isDragged = drag.current?.idx === i
+      ctx.font = '600 11px "Space Grotesk", sans-serif'
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      bs.forEach((b) => {
+        if (!b.alive) return
+        ctx.fillStyle = b.color
+        ctx.globalAlpha = 0.85
+        ctx.beginPath()
+        ctx.roundRect(b.x, b.y, b.w, b.h, 4)
+        ctx.fill()
+        ctx.globalAlpha = 1
+        ctx.fillStyle = '#fff'
+        ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h / 2 + 1)
+      })
 
-        if (!isDragged) {
-          b.vy += GRAVITY
-          b.vx *= FRICTION
-          b.vy *= FRICTION
-          b.x += b.vx
-          b.y += b.vy
-          b.angle += b.va
-          b.va *= 0.98
+      const pw = s.paddleW
+      const ph = PADDLE_H
+      const px = Math.max(pw / 2, Math.min(w - pw / 2, s.paddleX))
+      const py = h - 18
+      ctx.fillStyle = accent
+      ctx.beginPath()
+      ctx.roundRect(px - pw / 2, py - ph / 2, pw, ph, 5)
+      ctx.fill()
 
-          // walls
-          const hw = b.w / 2, hh = b.h / 2
-          if (b.y + hh > h) { b.y = h - hh; b.vy *= -BOUNCE; b.va *= 0.8; b.vx *= 0.95 }
-          if (b.x - hw < 0) { b.x = hw; b.vx *= -BOUNCE }
-          if (b.x + hw > w) { b.x = w - hw; b.vx *= -BOUNCE }
-          if (b.y - hh < 0) { b.y = hh; b.vy *= -BOUNCE }
+      if (s.running && !isPaused) {
+        if (!s.launched) {
+          s.ballX = px
+          s.ballY = py - ph / 2 - BALL_R - 2
+        } else {
+          s.ballX += s.bvx
+          s.ballY += s.bvy
 
-          // body-body collisions (simple push)
-          for (let j = i + 1; j < bs.length; j++) {
-            const o = bs[j]
-            const dx = o.x - b.x
-            const dy = o.y - b.y
-            const minDist = (b.w + o.w) / 2 * 0.7
-            const dist = Math.sqrt(dx * dx + dy * dy)
-            if (dist < minDist && dist > 0) {
-              const nx = dx / dist, ny = dy / dist
-              const overlap = (minDist - dist) / 2
-              b.x -= nx * overlap
-              b.y -= ny * overlap
-              o.x += nx * overlap
-              o.y += ny * overlap
-              const dvx = b.vx - o.vx
-              const dvy = b.vy - o.vy
-              const dot = dvx * nx + dvy * ny
-              if (dot > 0) {
-                b.vx -= dot * nx * 0.5
-                b.vy -= dot * ny * 0.5
-                o.vx += dot * nx * 0.5
-                o.vy += dot * ny * 0.5
+          if (s.ballX - BALL_R < 0) { s.ballX = BALL_R; s.bvx = Math.abs(s.bvx) }
+          if (s.ballX + BALL_R > w) { s.ballX = w - BALL_R; s.bvx = -Math.abs(s.bvx) }
+          if (s.ballY - BALL_R < 0) { s.ballY = BALL_R; s.bvy = Math.abs(s.bvy) }
+
+          if (
+            s.bvy > 0 &&
+            s.ballY + BALL_R >= py - ph / 2 &&
+            s.ballY - BALL_R <= py + ph / 2 &&
+            s.ballX >= px - pw / 2 - BALL_R &&
+            s.ballX <= px + pw / 2 + BALL_R
+          ) {
+            const rel = (s.ballX - px) / (pw / 2)
+            const speed = Math.sqrt(s.bvx * s.bvx + s.bvy * s.bvy)
+            const angle = -Math.PI / 2 + rel * 0.7
+            s.bvx = Math.cos(angle) * (speed + 0.05)
+            s.bvy = Math.sin(angle) * (speed + 0.05)
+            s.ballY = py - ph / 2 - BALL_R
+            haptic('light')
+          }
+
+          for (const b of bs) {
+            if (!b.alive) continue
+            if (
+              s.ballX + BALL_R > b.x && s.ballX - BALL_R < b.x + b.w &&
+              s.ballY + BALL_R > b.y && s.ballY - BALL_R < b.y + b.h
+            ) {
+              b.alive = false
+              setScore((p) => p + 10)
+              haptic('medium')
+              for (let k = 0; k < 8; k++) {
+                const a = Math.random() * Math.PI * 2
+                const spd = 1 + Math.random() * 3
+                sp.push({
+                  x: b.x + b.w / 2, y: b.y + b.h / 2,
+                  vx: Math.cos(a) * spd, vy: Math.sin(a) * spd,
+                  life: 1, color: b.color, r: 2 + Math.random() * 2,
+                })
               }
+              const fromSide = s.ballX < b.x || s.ballX > b.x + b.w
+              if (fromSide) s.bvx *= -1; else s.bvy *= -1
+              break
             }
           }
+
+          if (s.ballY > h + BALL_R) {
+            setLives((p) => {
+              const next = p - 1
+              if (next <= 0) {
+                s.running = false
+                setGameOver(true)
+                haptic('heavy')
+              } else {
+                resetBall()
+                haptic('heavy')
+              }
+              return next
+            })
+          }
+
+          if (bs.length > 0 && bs.every((b) => !b.alive)) {
+            s.running = false
+            setWon(true)
+            haptic('heavy')
+          }
+
+          const maxV = 8
+          s.bvx = Math.max(-maxV, Math.min(maxV, s.bvx))
+          s.bvy = Math.max(-maxV, Math.min(maxV, s.bvy))
         }
+      }
 
-        // draw
-        ctx.save()
-        ctx.translate(b.x, b.y)
-        ctx.rotate(b.angle)
+      ctx.beginPath()
+      ctx.arc(s.ballX, s.ballY, BALL_R, 0, Math.PI * 2)
+      ctx.fillStyle = '#fff'
+      ctx.fill()
 
-        const alpha = isDragged ? 1 : 0.85
-        ctx.fillStyle = b.color + (isDragged ? '' : 'dd')
-        ctx.globalAlpha = alpha
+      if (s.launched) {
         ctx.beginPath()
-        ctx.roundRect(-b.w / 2, -b.h / 2, b.w, b.h, 6)
+        ctx.arc(s.ballX, s.ballY, BALL_R * 3, 0, Math.PI * 2)
+        const g = ctx.createRadialGradient(s.ballX, s.ballY, 0, s.ballX, s.ballY, BALL_R * 3)
+        g.addColorStop(0, 'rgba(255,255,255,0.1)')
+        g.addColorStop(1, 'rgba(255,255,255,0)')
+        ctx.fillStyle = g
         ctx.fill()
+      }
 
-        if (isDragged) {
-          ctx.shadowColor = b.color
-          ctx.shadowBlur = 20
-          ctx.fill()
-          ctx.shadowBlur = 0
-        }
-
-        ctx.fillStyle = '#fff'
-        ctx.globalAlpha = isDragged ? 1 : 0.9
-        ctx.font = '600 12px "Space Grotesk", sans-serif'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillText(b.label, 0, 1)
-
-        ctx.restore()
+      for (let i = sp.length - 1; i >= 0; i--) {
+        const p = sp[i]
+        p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life -= 0.03
+        if (p.life <= 0) { sp.splice(i, 1); continue }
+        ctx.globalAlpha = p.life
+        ctx.fillStyle = p.color
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2)
+        ctx.fill()
         ctx.globalAlpha = 1
+      }
+
+      if (isPaused && s.running && s.launched) {
+        ctx.fillStyle = 'rgba(10,10,10,0.5)'
+        ctx.fillRect(0, 0, w, h)
+        ctx.fillStyle = '#fff'
+        ctx.font = '600 14px "Space Grotesk", sans-serif'
+        ctx.textAlign = 'center'
+        ctx.fillText('PAUSED', w / 2, h / 2 - 8)
+        ctx.font = '500 11px "Space Grotesk", sans-serif'
+        ctx.fillStyle = '#666'
+        ctx.fillText('Move cursor back to resume', w / 2, h / 2 + 12)
       }
 
       rafId = requestAnimationFrame(loop)
@@ -260,19 +368,67 @@ export default function SkillPlayground() {
 
     return () => {
       cancelAnimationFrame(rafId)
+      io.disconnect()
       ro.disconnect()
-      canvas.removeEventListener('pointerdown', onDown)
-      canvas.removeEventListener('pointermove', onMove)
-      canvas.removeEventListener('pointerup', onUp)
+      canvas.removeEventListener('pointermove', onPointerMove)
+      canvas.removeEventListener('pointerenter', onPointerEnter)
+      canvas.removeEventListener('pointerleave', onPointerLeave)
+      canvas.removeEventListener('touchmove', onTouch)
+      canvas.removeEventListener('touchstart', onTouchStart)
+      canvas.removeEventListener('touchend', onTouchEnd)
+      canvas.removeEventListener('click', onClick)
     }
-  }, [measure])
+  }, [buildBricks, resetBall, launch])
+
+  const restart = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    buildBricks(ctx)
+    resetBall()
+    setScore(0)
+    setLives(3)
+    setWon(false)
+    setGameOver(false)
+    setPaused(false)
+    state.current.running = true
+    sparks.current = []
+    haptic('medium')
+  }
+
+  const showOverlay = (!started) || (started && (won || gameOver))
 
   return (
     <div className="playground-wrapper">
+      <div className="playground-header">
+        {started && (
+          <>
+            <span className="playground-score">Score: {score}</span>
+            <span className="playground-lives">
+              {Array.from({ length: Math.max(0, lives) }, (_, i) => (
+                <span key={i} className="playground-heart" />
+              ))}
+            </span>
+          </>
+        )}
+      </div>
       <div className="playground-canvas-wrap" ref={wrapRef}>
         <canvas ref={canvasRef} className="playground-canvas" />
+        {showOverlay && (
+          <button className="playground-start" onClick={!started ? startGame : restart}>
+            <span className="playground-start-title">
+              {!started ? 'Skill Breaker' : won ? `Cleared! ${score} pts` : `Game Over — ${score} pts`}
+            </span>
+            <span className="playground-start-sub">
+              {!started ? 'Smash through the tech stack' : 'Tap to play again'}
+            </span>
+          </button>
+        )}
       </div>
-      <p className="playground-hint">Grab &amp; throw the skills around</p>
+      {started && state.current.running && !state.current.launched && !paused && (
+        <p className="playground-hint">Click or tap to launch</p>
+      )}
     </div>
   )
 }

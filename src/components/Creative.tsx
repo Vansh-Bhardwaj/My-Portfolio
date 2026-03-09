@@ -1,5 +1,7 @@
+import { useRef, useCallback } from 'react'
 import { useInView } from '../hooks/useInView'
 import ArrowIcon from './ArrowIcon'
+import { haptic } from '../hooks/useHaptics'
 
 interface CreativeProject {
   title: string
@@ -75,6 +77,58 @@ const creativeProjects: CreativeProject[] = [
   },
 ]
 
+function TiltCard({ project }: { project: CreativeProject }) {
+  const cardRef = useRef<HTMLDivElement>(null)
+
+  const handleMove = useCallback((e: React.PointerEvent) => {
+    const el = cardRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    el.style.transform = `perspective(600px) rotateY(${x * 8}deg) rotateX(${-y * 8}deg) translateY(-4px)`
+  }, [])
+
+  const handleLeave = useCallback(() => {
+    const el = cardRef.current
+    if (el) el.style.transform = ''
+  }, [])
+
+  const handleEnter = useCallback(() => { haptic('light') }, [])
+
+  return (
+    <div
+      ref={cardRef}
+      className="creative-card"
+      style={{ '--card-accent': project.accent } as React.CSSProperties}
+      onPointerMove={handleMove}
+      onPointerLeave={handleLeave}
+      onPointerEnter={handleEnter}
+    >
+      <div className="creative-card-header">
+        <span className="creative-category">{project.category}</span>
+      </div>
+      <h3 className="creative-card-title">{project.title}</h3>
+      <p className="creative-card-desc">{project.desc}</p>
+      <div className="creative-card-tech">
+        {project.tech.map((t) => (
+          <span key={t} className="creative-tech-tag">{t}</span>
+        ))}
+      </div>
+      {project.link && (
+        <a
+          href={project.link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="creative-card-link"
+        >
+          {project.link.label} <ArrowIcon size={10} />
+        </a>
+      )}
+    </div>
+  )
+}
+
 export default function Creative() {
   const { ref, isVisible } = useInView()
 
@@ -82,35 +136,10 @@ export default function Creative() {
     <section id="creative" className="section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">Game Dev &amp; VR / AR</p>
+          <p className="section-label"><span className="section-num">03</span> Game Dev &amp; VR / AR</p>
           <div className="creative-grid">
             {creativeProjects.map((project) => (
-              <div
-                key={project.title}
-                className="creative-card"
-                style={{ '--card-accent': project.accent } as React.CSSProperties}
-              >
-                <div className="creative-card-header">
-                  <span className="creative-category">{project.category}</span>
-                </div>
-                <h3 className="creative-card-title">{project.title}</h3>
-                <p className="creative-card-desc">{project.desc}</p>
-                <div className="creative-card-tech">
-                  {project.tech.map((t) => (
-                    <span key={t} className="creative-tech-tag">{t}</span>
-                  ))}
-                </div>
-                {project.link && (
-                  <a
-                    href={project.link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="creative-card-link"
-                  >
-                    {project.link.label} <ArrowIcon size={10} />
-                  </a>
-                )}
-              </div>
+              <TiltCard key={project.title} project={project} />
             ))}
           </div>
         </div>

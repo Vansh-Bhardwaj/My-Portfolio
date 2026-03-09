@@ -17,7 +17,7 @@ export default function About() {
     <section id="about" className="section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">About</p>
+          <p className="section-label"><span className="section-num">01</span> About</p>
 
           <div className="about-grid">
             <div className="about-bio">

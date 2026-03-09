@@ -91,7 +91,7 @@ export default function Experience() {
     <section id="experience" className="section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">Experience &amp; Education</p>
+          <p className="section-label"><span className="section-num">04</span> Experience &amp; Education</p>
           <p className="experience-intro">
             A timeline of roles, projects, and milestones that shaped how I build software.
           </p>

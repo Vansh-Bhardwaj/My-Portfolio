@@ -31,7 +31,7 @@ export default function Stack() {
     <section id="stack" className="section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">Tech Stack</p>
+          <p className="section-label"><span className="section-num">05</span> Tech Stack</p>
           <div className="stack-grid">
             {stack.map((cat) => (
               <div key={cat.label} className="stack-category">

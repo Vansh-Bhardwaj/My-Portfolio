@@ -44,7 +44,7 @@ export default function Contact() {
     <section id="contact" className="contact section">
       <div className="container">
         <div ref={ref} className={`reveal ${isVisible ? 'visible' : ''}`}>
-          <p className="section-label">Contact</p>
+          <p className="section-label"><span className="section-num">06</span> Contact</p>
           <h2 className="contact-heading">
             Let&rsquo;s<br />
             <span className="accent">Work</span><br />
