@@ -487,74 +487,34 @@ button:hover .arrow-icon {
   color: var(--accent);
 }
 
-/* ===== Pong Mini-Game ===== */
+/* ===== Skill Constellation ===== */
 
-.pong-wrapper {
+.constellation-wrapper {
   margin-top: 56px;
   padding-top: 40px;
   border-top: 1px solid var(--border);
 }
 
-.pong-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
+.constellation-canvas-wrap {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
 }
 
-.pong-label {
+.constellation-canvas {
+  display: block;
+}
+
+.constellation-hint {
+  margin-top: 12px;
   font-size: 0.6875rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   color: var(--text-muted);
-}
-
-.pong-score {
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--accent);
-  font-variant-numeric: tabular-nums;
-}
-
-.pong-canvas-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 600px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid var(--border);
-  touch-action: none;
-}
-
-.pong-canvas {
-  display: block;
-  width: 100%;
-  height: auto;
-  cursor: none;
-}
-
-.pong-start {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--text);
-  background: rgba(10, 10, 10, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.pong-start:hover {
-  background: rgba(10, 10, 10, 0.4);
+  opacity: 0.5;
 }
 
 /* ===== About Stats ===== */
@@ -1465,13 +1425,13 @@ button:hover .arrow-icon {
     font-size: 1.125rem;
   }
 
-  .pong-canvas-wrap {
-    border-radius: 6px;
-  }
-
-  .pong-wrapper {
+  .constellation-wrapper {
     margin-top: 40px;
     padding-top: 32px;
+  }
+
+  .constellation-hint {
+    display: none;
   }
 }
 

@@ -1,5 +1,5 @@
 import { useInView } from '../hooks/useInView'
-import PongGame from './PongGame'
+import SkillConstellation from './SkillConstellation'
 
 const skills = [
   'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js',
@@ -82,7 +82,7 @@ export default function About() {
             ))}
           </div>
 
-          <PongGame />
+          <SkillConstellation />
         </div>
       </div>
     </section>
