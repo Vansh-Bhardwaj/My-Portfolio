@@ -12,8 +12,7 @@ interface Project {
   role: string
   tech: string[]
   accent: string
-  screenshot: string
-  screenshotFull: string
+  video: string
 }
 
 const projects: Project[] = [
@@ -27,8 +26,7 @@ const projects: Project[] = [
     role: 'Full-stack Developer at Simapt',
     tech: ['React', 'TypeScript', '3D / AR', 'Node.js', 'E-commerce'],
     accent: '#1a8a8a',
-    screenshot: '/projects/centuary-sofas.webp',
-    screenshotFull: '/projects/centuary-sofas-full.webp',
+    video: '/projects/centuary-sofas.mp4',
   },
   {
     num: '02',
@@ -40,8 +38,7 @@ const projects: Project[] = [
     role: 'Creator & Active Maintainer',
     tech: ['Next.js', 'TypeScript', 'Cloudflare Workers'],
     accent: '#FFC107',
-    screenshot: '/projects/debridui.webp',
-    screenshotFull: '/projects/debridui-full.webp',
+    video: '/projects/debridui.mp4',
   },
   {
     num: '03',
@@ -53,8 +50,7 @@ const projects: Project[] = [
     role: 'Co-Founder & Lead Developer',
     tech: ['Next.js', 'Unity', 'Game Dev'],
     accent: '#2563EB',
-    screenshot: '/projects/allvarity-studio.webp',
-    screenshotFull: '/projects/allvarity-studio-full.webp',
+    video: '/projects/allvarity-studio.mp4',
   },
 ]
 
@@ -78,12 +74,14 @@ function BrowserMockup({ project }: { project: Project }) {
         </div>
       </div>
       <div className="browser-viewport">
-        <img
-          src={project.screenshotFull}
-          alt={`${project.title} \u2014 website preview`}
-          className="browser-screenshot"
-          loading="lazy"
-          decoding="async"
+        <video
+          src={project.video}
+          className="browser-video"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="metadata"
         />
       </div>
     </div>

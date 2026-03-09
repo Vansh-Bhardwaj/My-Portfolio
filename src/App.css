@@ -713,27 +713,21 @@ button:hover .arrow-icon {
   font-family: var(--font);
 }
 
-/* viewport with scrolling screenshot */
+/* viewport with looping video */
 
 .browser-viewport {
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 10;
   position: relative;
   overflow: hidden;
+  background: #0a0a0a;
 }
 
-.browser-screenshot {
+.browser-video {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: cover;
-  object-position: top center;
-  animation: screenshotPan 30s ease-in-out infinite;
-  will-change: transform;
-}
-
-@keyframes screenshotPan {
-  0%, 100% { transform: translateY(0); }
-  40%, 60% { transform: translateY(-30%); }
+  object-position: center top;
 }
 
 /* footer */
@@ -1224,6 +1218,10 @@ button:hover .arrow-icon {
 
   .browser-viewport {
     aspect-ratio: 4 / 3;
+  }
+
+  .browser-video {
+    object-position: center center;
   }
 
   .project-footer-row {
