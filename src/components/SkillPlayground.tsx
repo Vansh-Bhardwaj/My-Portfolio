@@ -29,7 +29,9 @@ const BRICK_H = 26
 const BRICK_GAP = 4
 const SPEED_INIT = 3.5
 const SPEED_MAX = 8
-const AI_LERP = 0.08
+const AI_LERP = 0.12
+const DESCEND_SPEED = 0.08
+const SPAWN_INTERVAL = 240
 
 export default function SkillPlayground() {
   const wrapRef = useRef<HTMLDivElement>(null)
@@ -51,6 +53,7 @@ export default function SkillPlayground() {
     launched: false, over: false,
     human: false, aiTimer: 0,
     score: 0, lives: 3,
+    spawnTimer: 0, waveIdx: 0,
   })
   const tapRef = useRef({ x: 0, y: 0, t: 0, moved: false, blocked: false })
   const lastPtrType = useRef('mouse')
@@ -89,6 +92,27 @@ export default function SkillPlayground() {
       bricksRef.current = rows.flat()
     }
 
+    const spawnRow = (y: number) => {
+      const { w } = dims.current
+      ctx.font = '600 11px "Space Grotesk", sans-serif'
+      const g = game.current
+      g.waveIdx++
+      const start = (g.waveIdx * 5) % SKILLS.length
+      const count = 4 + (g.waveIdx % 3)
+      const selected: typeof SKILLS[number][] = []
+      for (let i = 0; i < count; i++) {
+        selected.push(SKILLS[(start + i) % SKILLS.length])
+      }
+      const newBricks: Brick[] = selected.map(s => ({
+        x: 0, y, w: ctx.measureText(s.label).width + 20,
+        h: BRICK_H, label: s.label, color: CAT_COLORS[s.cat], alive: true,
+      }))
+      const tw = newBricks.reduce((a, b) => a + b.w, 0) + (newBricks.length - 1) * BRICK_GAP
+      let sx = (w - tw) / 2
+      for (const b of newBricks) { b.x = sx; sx += b.w + BRICK_GAP }
+      bricksRef.current.push(...newBricks)
+    }
+
     const resetBall = () => {
       const g = game.current
       const { w, h } = dims.current
@@ -111,6 +135,7 @@ export default function SkillPlayground() {
       const g = game.current
       buildBricks()
       g.lives = 3; g.score = 0; g.over = false; g.aiTimer = 0
+      g.spawnTimer = 0; g.waveIdx = 0
       particlesRef.current = []
       setScore(0); setLives(3)
       resetBall()
@@ -146,6 +171,20 @@ export default function SkillPlayground() {
     resize()
     const ro = new ResizeObserver(resize)
     ro.observe(wrap)
+
+    const predictLanding = (w: number, py: number): number => {
+      const g = game.current
+      if (g.vy <= 0) return g.bx
+      let x = g.bx, y = g.by, dx = g.vx, dy = g.vy
+      for (let i = 0; i < 300; i++) {
+        x += dx; y += dy
+        if (x < BALL_R) { x = BALL_R; dx = -dx }
+        if (x > w - BALL_R) { x = w - BALL_R; dx = -dx }
+        if (y < BALL_R) { y = BALL_R; dy = -dy }
+        if (y >= py) return x
+      }
+      return x
+    }
 
     /* ── Input handlers ── */
 
@@ -232,27 +271,81 @@ export default function SkillPlayground() {
       const ps = particlesRef.current
       const ac = accentRef.current
       const ai = !g.human
+      const py = h - 18
 
       ctx.clearRect(0, 0, w, h)
 
       ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1
       ctx.beginPath(); ctx.moveTo(0, h - 1); ctx.lineTo(w, h - 1); ctx.stroke()
 
-      if (bs.length > 0 && bs.every(b => !b.alive)) {
-        if (ai) fullReset()
-        else { buildBricks(); resetBall() }
+      /* ── Brick descent & spawning ── */
+      for (const b of bs) {
+        if (b.alive) b.y += DESCEND_SPEED
       }
 
+      bricksRef.current = bs.filter(b => b.alive && b.y < h + BRICK_H)
+
+      g.spawnTimer++
+      const aliveBricks = bricksRef.current.filter(b => b.alive)
+      const hasAlive = aliveBricks.length > 0
+
+      if (g.spawnTimer >= SPAWN_INTERVAL || !hasAlive) {
+        let minY = h
+        for (const b of bricksRef.current) {
+          if (b.alive && b.y < minY) minY = b.y
+        }
+        if (minY > BRICK_H + BRICK_GAP + 16 || !hasAlive) {
+          spawnRow(hasAlive ? 4 : 12)
+          g.spawnTimer = 0
+        }
+      }
+
+      const currentBs = bricksRef.current
+
+      /* ── AI logic ── */
       if (ai) {
         if (g.over) fullReset()
-        g.px += ((g.launched ? g.bx + g.vx * 8 : w / 2) - g.px) * AI_LERP
-        if (!g.launched) { g.aiTimer++; if (g.aiTimer > 90) { launch(); g.aiTimer = 0 } }
+
+        if (g.launched) {
+          let targetX: number
+
+          if (g.vy > 0) {
+            targetX = predictLanding(w, py)
+
+            let leftW = 0, rightW = 0
+            for (const b of currentBs) {
+              if (!b.alive) continue
+              if (b.x + b.w / 2 < w / 2) leftW++; else rightW++
+            }
+            const aimDir = rightW > leftW ? -1 : leftW > rightW ? 1 : 0
+            targetX += aimDir * g.pw * 0.2
+
+            if (Math.abs(g.vx) < 1.0) {
+              const nudgeDir = rightW > leftW ? -1 : 1
+              targetX += nudgeDir * g.pw * 0.3
+            }
+          } else {
+            let lowestBrick: Brick | null = null
+            let maxY = -1
+            for (const b of currentBs) {
+              if (!b.alive) continue
+              if (b.y + b.h > maxY) { maxY = b.y + b.h; lowestBrick = b }
+            }
+            targetX = lowestBrick ? lowestBrick.x + lowestBrick.w / 2 : w / 2
+          }
+
+          g.px += (Math.max(g.pw / 2, Math.min(w - g.pw / 2, targetX)) - g.px) * AI_LERP
+        } else {
+          g.px += (w / 2 - g.px) * AI_LERP
+          g.aiTimer++
+          if (g.aiTimer > 90) { launch(); g.aiTimer = 0 }
+        }
       }
 
-      /* bricks */
+      /* ── Draw bricks ── */
       ctx.font = '600 11px "Space Grotesk", sans-serif'
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-      for (const b of bs) {
+      for (const b of currentBs) {
         if (!b.alive) continue
         ctx.fillStyle = b.color; ctx.globalAlpha = 0.85
         ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 4); ctx.fill()
@@ -260,23 +353,33 @@ export default function SkillPlayground() {
         ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h / 2 + 1)
       }
 
-      /* paddle */
+      /* ── Paddle ── */
       const pw = g.pw
       const px = Math.max(pw / 2, Math.min(w - pw / 2, g.px))
-      const py = h - 18
       ctx.fillStyle = ai ? '#444' : ac
       ctx.beginPath(); ctx.roundRect(px - pw / 2, py - PADDLE_H / 2, pw, PADDLE_H, 5); ctx.fill()
 
-      /* physics */
+      /* ── Ball physics ── */
       if (!g.over) {
         if (!g.launched) {
           g.bx = px; g.by = py - PADDLE_H / 2 - BALL_R - 2
         } else {
           g.bx += g.vx; g.by += g.vy
 
-          if (g.bx - BALL_R < 0) { g.bx = BALL_R; g.vx = Math.abs(g.vx) }
-          if (g.bx + BALL_R > w) { g.bx = w - BALL_R; g.vx = -Math.abs(g.vx) }
-          if (g.by - BALL_R < 0) { g.by = BALL_R; g.vy = Math.abs(g.vy) }
+          if (g.bx - BALL_R < 0) {
+            g.bx = BALL_R; g.vx = Math.abs(g.vx)
+            if (Math.abs(g.vx) < 0.8) g.vx += (Math.random() > 0.5 ? 1 : -1) * 0.6
+          }
+          if (g.bx + BALL_R > w) {
+            g.bx = w - BALL_R; g.vx = -Math.abs(g.vx)
+            if (Math.abs(g.vx) < 0.8) g.vx += (Math.random() > 0.5 ? 1 : -1) * 0.6
+          }
+          if (g.by - BALL_R < 0) {
+            g.by = BALL_R; g.vy = Math.abs(g.vy)
+            if (Math.abs(g.vx) < 0.8) {
+              g.vx += (Math.random() > 0.5 ? 1 : -1) * (0.5 + Math.random() * 0.8)
+            }
+          }
 
           if (
             g.vy > 0 &&
@@ -288,10 +391,13 @@ export default function SkillPlayground() {
             const ang = -Math.PI / 2 + rel * 0.7
             g.vx = Math.cos(ang) * spd; g.vy = Math.sin(ang) * spd
             g.by = py - PADDLE_H / 2 - BALL_R
+            if (Math.abs(g.vx) < 0.5) {
+              g.vx += (rel >= 0 ? 1 : -1) * 0.6
+            }
             if (!ai) haptic('light')
           }
 
-          for (const b of bs) {
+          for (const b of currentBs) {
             if (!b.alive) continue
             if (
               g.bx + BALL_R > b.x && g.bx - BALL_R < b.x + b.w &&
@@ -327,7 +433,7 @@ export default function SkillPlayground() {
         }
       }
 
-      /* ball */
+      /* ── Draw ball ── */
       ctx.beginPath(); ctx.arc(g.bx, g.by, BALL_R, 0, Math.PI * 2)
       ctx.fillStyle = '#fff'; ctx.fill()
 
@@ -339,7 +445,7 @@ export default function SkillPlayground() {
         ctx.fillStyle = gr; ctx.fill()
       }
 
-      /* particles */
+      /* ── Particles ── */
       for (let i = ps.length - 1; i >= 0; i--) {
         const p = ps[i]
         p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life -= 0.03
@@ -349,13 +455,13 @@ export default function SkillPlayground() {
         ctx.globalAlpha = 1
       }
 
-      /* AI label */
+      /* ── AI label ── */
       if (ai && !g.over) {
         ctx.fillStyle = '#333'; ctx.font = '500 10px "Space Grotesk", sans-serif'
         ctx.textAlign = 'right'; ctx.fillText('AI playing', w - 12, h - 6)
       }
 
-      /* game over */
+      /* ── Game over ── */
       if (g.over && !ai) {
         ctx.fillStyle = 'rgba(10,10,10,0.7)'; ctx.fillRect(0, 0, w, h)
         ctx.fillStyle = ac; ctx.font = '700 16px "Space Grotesk", sans-serif'
