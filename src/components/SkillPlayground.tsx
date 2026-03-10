@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { haptic } from '../hooks/useHaptics'
 
 const SKILLS = [
@@ -13,13 +13,22 @@ const SKILLS = [
 
 const CAT_COLORS = ['#FF4D00', '#6366F1', '#14B8A6']
 
-interface Brick { x: number; y: number; w: number; h: number; label: string; color: string; alive: boolean }
-interface Spark { x: number; y: number; vx: number; vy: number; life: number; color: string; r: number }
+interface Brick {
+  x: number; y: number; w: number; h: number
+  label: string; color: string; alive: boolean
+}
+
+interface Particle {
+  x: number; y: number; vx: number; vy: number
+  life: number; color: string; size: number
+}
 
 const BALL_R = 5
 const PADDLE_H = 10
 const BRICK_H = 26
-const BRICK_PAD = 4
+const BRICK_GAP = 4
+const SPEED_INIT = 3.5
+const SPEED_MAX = 8
 const AI_LERP = 0.08
 
 export default function SkillPlayground() {
@@ -27,70 +36,24 @@ export default function SkillPlayground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [score, setScore] = useState(0)
   const [lives, setLives] = useState(3)
-  const [isHuman, setIsHuman] = useState(false)
+  const [mode, setMode] = useState<'ai' | 'human'>('ai')
+  const [isTouch] = useState(
+    () => 'ontouchstart' in window || navigator.maxTouchPoints > 0
+  )
+
   const dims = useRef({ w: 0, h: 0 })
-  const bricks = useRef<Brick[]>([])
-  const sparks = useRef<Spark[]>([])
-  const humanInside = useRef(false)
-  const accentCache = useRef('#FF4D00')
-  const state = useRef({
-    ballX: 0, ballY: 0, bvx: 0, bvy: 0,
-    paddleX: 0, paddleW: 100,
-    running: true, launched: false,
+  const bricksRef = useRef<Brick[]>([])
+  const particlesRef = useRef<Particle[]>([])
+  const accentRef = useRef('#FF4D00')
+  const game = useRef({
+    bx: 0, by: 0, vx: 0, vy: 0,
+    px: 0, pw: 100,
+    launched: false, over: false,
+    human: false, aiTimer: 0,
+    score: 0, lives: 3,
   })
-
-  const resetBall = useCallback(() => {
-    const { w, h } = dims.current
-    const s = state.current
-    s.ballX = w / 2
-    s.ballY = h - 30 - BALL_R
-    s.bvx = 0
-    s.bvy = 0
-    s.paddleX = w / 2
-    s.launched = false
-  }, [])
-
-  const launchBall = useCallback(() => {
-    if (state.current.launched) return
-    state.current.launched = true
-    const speed = 4
-    const angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.6
-    state.current.bvx = Math.cos(angle) * speed
-    state.current.bvy = Math.sin(angle) * speed
-  }, [])
-
-  const buildBricks = useCallback((ctx: CanvasRenderingContext2D) => {
-    const { w } = dims.current
-    ctx.font = '600 11px "Space Grotesk", sans-serif'
-    const margin = 8
-    const rows: Brick[][] = []
-    let row: Brick[] = []
-    let cx = margin
-    SKILLS.forEach((s) => {
-      const tw = ctx.measureText(s.label).width
-      const bw = tw + 20
-      if (cx + bw + margin > w && row.length > 0) { rows.push(row); row = []; cx = margin }
-      row.push({ x: cx, y: 0, w: bw, h: BRICK_H, label: s.label, color: CAT_COLORS[s.cat], alive: true })
-      cx += bw + BRICK_PAD
-    })
-    if (row.length) rows.push(row)
-    const topPad = 12
-    rows.forEach((r, ri) => {
-      const totalW = r.reduce((a, b) => a + b.w, 0) + (r.length - 1) * BRICK_PAD
-      let sx = (w - totalW) / 2
-      r.forEach((b) => { b.x = sx; b.y = topPad + ri * (BRICK_H + BRICK_PAD); sx += b.w + BRICK_PAD })
-    })
-    bricks.current = rows.flat()
-  }, [])
-
-  const fullReset = useCallback((ctx: CanvasRenderingContext2D) => {
-    buildBricks(ctx)
-    resetBall()
-    setScore(0)
-    setLives(3)
-    state.current.running = true
-    sparks.current = []
-  }, [buildBricks, resetBall])
+  const tapRef = useRef({ x: 0, y: 0, t: 0, moved: false, blocked: false })
+  const lastPtrType = useRef('mouse')
 
   useEffect(() => {
     const wrap = wrapRef.current
@@ -99,277 +62,335 @@ export default function SkillPlayground() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    accentCache.current = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#FF4D00'
+    const touchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+    accentRef.current =
+      getComputedStyle(document.documentElement)
+        .getPropertyValue('--accent').trim() || '#FF4D00'
+
+    const buildBricks = () => {
+      const { w } = dims.current
+      ctx.font = '600 11px "Space Grotesk", sans-serif'
+      const rows: Brick[][] = []
+      let row: Brick[] = []
+      let cx = 8
+      for (const s of SKILLS) {
+        const bw = ctx.measureText(s.label).width + 20
+        if (cx + bw + 8 > w && row.length) { rows.push(row); row = []; cx = 8 }
+        row.push({ x: cx, y: 0, w: bw, h: BRICK_H, label: s.label, color: CAT_COLORS[s.cat], alive: true })
+        cx += bw + BRICK_GAP
+      }
+      if (row.length) rows.push(row)
+      const top = 12
+      rows.forEach((r, ri) => {
+        const tw = r.reduce((a, b) => a + b.w, 0) + (r.length - 1) * BRICK_GAP
+        let sx = (w - tw) / 2
+        r.forEach(b => { b.x = sx; b.y = top + ri * (BRICK_H + BRICK_GAP); sx += b.w + BRICK_GAP })
+      })
+      bricksRef.current = rows.flat()
+    }
+
+    const resetBall = () => {
+      const g = game.current
+      const { w, h } = dims.current
+      g.bx = g.human ? Math.max(g.pw / 2, Math.min(w - g.pw / 2, g.px)) : w / 2
+      g.by = h - 30 - BALL_R
+      g.vx = 0; g.vy = 0; g.launched = false
+      if (!g.human) g.px = w / 2
+    }
+
+    const launch = () => {
+      const g = game.current
+      if (g.launched || g.over) return
+      g.launched = true
+      const a = -Math.PI / 2 + (Math.random() - 0.5) * 0.6
+      g.vx = Math.cos(a) * SPEED_INIT
+      g.vy = Math.sin(a) * SPEED_INIT
+    }
+
+    const fullReset = () => {
+      const g = game.current
+      buildBricks()
+      g.lives = 3; g.score = 0; g.over = false; g.aiTimer = 0
+      particlesRef.current = []
+      setScore(0); setLives(3)
+      resetBall()
+    }
+
+    const goHuman = () => {
+      const g = game.current
+      if (g.human) return
+      g.human = true; setMode('human')
+      fullReset(); haptic('medium')
+    }
+
+    const goAI = () => {
+      const g = game.current
+      if (!g.human) return
+      g.human = false; setMode('ai')
+      fullReset()
+    }
 
     const resize = () => {
-      const rect = wrap.getBoundingClientRect()
-      const w = Math.round(rect.width)
+      const r = wrap.getBoundingClientRect()
+      const w = Math.round(r.width)
       const h = Math.min(320, Math.max(220, Math.round(w / 3.2)))
       dims.current = { w, h }
       const dpr = Math.min(devicePixelRatio, 2)
-      canvas.width = w * dpr
-      canvas.height = h * dpr
-      canvas.style.width = w + 'px'
-      canvas.style.height = h + 'px'
+      canvas.width = w * dpr; canvas.height = h * dpr
+      canvas.style.width = w + 'px'; canvas.style.height = h + 'px'
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-      state.current.paddleW = Math.max(60, w * 0.1)
-      fullReset(ctx)
+      game.current.pw = Math.max(60, w * 0.12)
+      fullReset()
     }
 
     resize()
     const ro = new ResizeObserver(resize)
     ro.observe(wrap)
 
+    /* ── Input handlers ── */
+
+    const onPointerDown = (e: PointerEvent) => {
+      lastPtrType.current = e.pointerType
+      if (e.pointerType !== 'touch') return
+
+      const g = game.current
+      const rect = canvas.getBoundingClientRect()
+      const x = e.clientX - rect.left
+
+      tapRef.current = { x: e.clientX, y: e.clientY, t: Date.now(), moved: false, blocked: false }
+
+      if (!g.human) {
+        goHuman(); g.px = x
+        tapRef.current.blocked = true
+        return
+      }
+      if (g.over) {
+        fullReset()
+        tapRef.current.blocked = true
+        return
+      }
+      g.px = x
+    }
+
     const onPointerMove = (e: PointerEvent) => {
+      const g = game.current
       const rect = canvas.getBoundingClientRect()
-      state.current.paddleX = e.clientX - rect.left
-      if (!humanInside.current) {
-        humanInside.current = true
-        setIsHuman(true)
-        fullReset(ctx)
-        haptic('medium')
-      }
-    }
-    const onPointerEnter = () => {
-      if (!humanInside.current) {
-        humanInside.current = true
-        setIsHuman(true)
-        fullReset(ctx)
-        haptic('medium')
-      }
-    }
-    const onPointerLeave = () => {
-      humanInside.current = false
-      setIsHuman(false)
-    }
-    const onTouch = (e: TouchEvent) => {
-      e.preventDefault()
-      const rect = canvas.getBoundingClientRect()
-      state.current.paddleX = e.touches[0].clientX - rect.left
-      if (!humanInside.current) {
-        humanInside.current = true
-        setIsHuman(true)
-        fullReset(ctx)
-        haptic('medium')
-      }
-    }
-    const onClick = () => {
-      if (state.current.running && !state.current.launched) {
-        launchBall()
-        haptic('light')
+      const x = e.clientX - rect.left
+
+      if (e.pointerType === 'mouse') {
+        g.px = x
+        if (!g.human) goHuman()
+      } else if (e.pointerType === 'touch') {
+        g.px = x
+        const dx = e.clientX - tapRef.current.x
+        const dy = e.clientY - tapRef.current.y
+        if (dx * dx + dy * dy > 64) tapRef.current.moved = true
       }
     }
 
+    const onPointerUp = (e: PointerEvent) => {
+      if (e.pointerType !== 'touch') return
+      const tp = tapRef.current
+      const g = game.current
+      if (tp.blocked) return
+      if (!tp.moved && Date.now() - tp.t < 300 && !g.launched && !g.over && g.human) {
+        launch(); haptic('light')
+      }
+    }
+
+    const onPointerEnter = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse' && !game.current.human) goHuman()
+    }
+
+    const onPointerLeave = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse') goAI()
+    }
+
+    const onClick = () => {
+      if (lastPtrType.current !== 'mouse') return
+      const g = game.current
+      if (!g.human) return
+      if (g.over) { fullReset(); return }
+      if (!g.launched) { launch(); haptic('light') }
+    }
+
+    wrap.addEventListener('pointerdown', onPointerDown)
     wrap.addEventListener('pointermove', onPointerMove)
+    wrap.addEventListener('pointerup', onPointerUp)
     wrap.addEventListener('pointerenter', onPointerEnter)
     wrap.addEventListener('pointerleave', onPointerLeave)
-    wrap.addEventListener('touchmove', onTouch, { passive: false })
     wrap.addEventListener('click', onClick)
 
-    let autoLaunchTimer = 0
-    let rafId: number
+    /* ── Game loop ── */
+
+    let raf = 0
 
     const loop = () => {
       const { w, h } = dims.current
-      const s = state.current
-      const sp = sparks.current
-      const bs = bricks.current
-      const accent = accentCache.current
-      const aiMode = !humanInside.current
+      const g = game.current
+      const bs = bricksRef.current
+      const ps = particlesRef.current
+      const ac = accentRef.current
+      const ai = !g.human
 
       ctx.clearRect(0, 0, w, h)
 
-      ctx.strokeStyle = '#1a1a1a'
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.moveTo(0, h - 1)
-      ctx.lineTo(w, h - 1)
-      ctx.stroke()
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 1
+      ctx.beginPath(); ctx.moveTo(0, h - 1); ctx.lineTo(w, h - 1); ctx.stroke()
 
-      // auto-restart when all bricks gone
-      if (bs.length > 0 && bs.every((b) => !b.alive)) {
-        fullReset(ctx)
+      if (bs.length > 0 && bs.every(b => !b.alive)) {
+        if (ai) fullReset()
+        else { buildBricks(); resetBall() }
       }
 
-      // AI paddle tracking
-      if (aiMode && s.running) {
-        const targetX = s.launched ? s.ballX + s.bvx * 8 : w / 2
-        s.paddleX += (targetX - s.paddleX) * AI_LERP
-
-        if (!s.launched) {
-          autoLaunchTimer++
-          if (autoLaunchTimer > 90) {
-            launchBall()
-            autoLaunchTimer = 0
-          }
-        }
+      if (ai) {
+        if (g.over) fullReset()
+        g.px += ((g.launched ? g.bx + g.vx * 8 : w / 2) - g.px) * AI_LERP
+        if (!g.launched) { g.aiTimer++; if (g.aiTimer > 90) { launch(); g.aiTimer = 0 } }
       }
 
-      // auto-restart on death in AI mode
-      if (aiMode && !s.running) {
-        fullReset(ctx)
-      }
-
-      // bricks
+      /* bricks */
       ctx.font = '600 11px "Space Grotesk", sans-serif'
-      ctx.textAlign = 'center'
-      ctx.textBaseline = 'middle'
-      bs.forEach((b) => {
-        if (!b.alive) return
-        ctx.fillStyle = b.color
-        ctx.globalAlpha = 0.85
-        ctx.beginPath()
-        ctx.roundRect(b.x, b.y, b.w, b.h, 4)
-        ctx.fill()
-        ctx.globalAlpha = 1
-        ctx.fillStyle = '#fff'
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+      for (const b of bs) {
+        if (!b.alive) continue
+        ctx.fillStyle = b.color; ctx.globalAlpha = 0.85
+        ctx.beginPath(); ctx.roundRect(b.x, b.y, b.w, b.h, 4); ctx.fill()
+        ctx.globalAlpha = 1; ctx.fillStyle = '#fff'
         ctx.fillText(b.label, b.x + b.w / 2, b.y + b.h / 2 + 1)
-      })
+      }
 
-      // paddle
-      const pw = s.paddleW
-      const ph = PADDLE_H
-      const px = Math.max(pw / 2, Math.min(w - pw / 2, s.paddleX))
+      /* paddle */
+      const pw = g.pw
+      const px = Math.max(pw / 2, Math.min(w - pw / 2, g.px))
       const py = h - 18
-      ctx.fillStyle = aiMode ? '#444' : accent
-      ctx.beginPath()
-      ctx.roundRect(px - pw / 2, py - ph / 2, pw, ph, 5)
-      ctx.fill()
+      ctx.fillStyle = ai ? '#444' : ac
+      ctx.beginPath(); ctx.roundRect(px - pw / 2, py - PADDLE_H / 2, pw, PADDLE_H, 5); ctx.fill()
 
-      if (s.running) {
-        if (!s.launched) {
-          s.ballX = px
-          s.ballY = py - ph / 2 - BALL_R - 2
+      /* physics */
+      if (!g.over) {
+        if (!g.launched) {
+          g.bx = px; g.by = py - PADDLE_H / 2 - BALL_R - 2
         } else {
-          s.ballX += s.bvx
-          s.ballY += s.bvy
+          g.bx += g.vx; g.by += g.vy
 
-          if (s.ballX - BALL_R < 0) { s.ballX = BALL_R; s.bvx = Math.abs(s.bvx) }
-          if (s.ballX + BALL_R > w) { s.ballX = w - BALL_R; s.bvx = -Math.abs(s.bvx) }
-          if (s.ballY - BALL_R < 0) { s.ballY = BALL_R; s.bvy = Math.abs(s.bvy) }
+          if (g.bx - BALL_R < 0) { g.bx = BALL_R; g.vx = Math.abs(g.vx) }
+          if (g.bx + BALL_R > w) { g.bx = w - BALL_R; g.vx = -Math.abs(g.vx) }
+          if (g.by - BALL_R < 0) { g.by = BALL_R; g.vy = Math.abs(g.vy) }
 
           if (
-            s.bvy > 0 && s.ballY + BALL_R >= py - ph / 2 && s.ballY - BALL_R <= py + ph / 2 &&
-            s.ballX >= px - pw / 2 - BALL_R && s.ballX <= px + pw / 2 + BALL_R
+            g.vy > 0 &&
+            g.by + BALL_R >= py - PADDLE_H / 2 && g.by - BALL_R <= py + PADDLE_H / 2 &&
+            g.bx >= px - pw / 2 - BALL_R && g.bx <= px + pw / 2 + BALL_R
           ) {
-            const rel = (s.ballX - px) / (pw / 2)
-            const speed = Math.sqrt(s.bvx * s.bvx + s.bvy * s.bvy)
-            const angle = -Math.PI / 2 + rel * 0.7
-            s.bvx = Math.cos(angle) * (speed + 0.05)
-            s.bvy = Math.sin(angle) * (speed + 0.05)
-            s.ballY = py - ph / 2 - BALL_R
-            if (!aiMode) haptic('light')
+            const rel = (g.bx - px) / (pw / 2)
+            const spd = Math.min(Math.hypot(g.vx, g.vy) + 0.05, SPEED_MAX)
+            const ang = -Math.PI / 2 + rel * 0.7
+            g.vx = Math.cos(ang) * spd; g.vy = Math.sin(ang) * spd
+            g.by = py - PADDLE_H / 2 - BALL_R
+            if (!ai) haptic('light')
           }
 
           for (const b of bs) {
             if (!b.alive) continue
-            if (s.ballX + BALL_R > b.x && s.ballX - BALL_R < b.x + b.w &&
-                s.ballY + BALL_R > b.y && s.ballY - BALL_R < b.y + b.h) {
+            if (
+              g.bx + BALL_R > b.x && g.bx - BALL_R < b.x + b.w &&
+              g.by + BALL_R > b.y && g.by - BALL_R < b.y + b.h
+            ) {
               b.alive = false
-              if (!aiMode) setScore((p) => p + 10)
-              if (!aiMode) haptic('medium')
+              if (!ai) { g.score += 10; setScore(g.score); haptic('medium') }
               for (let k = 0; k < 8; k++) {
                 const a = Math.random() * Math.PI * 2
-                const spd = 1 + Math.random() * 3
-                sp.push({ x: b.x + b.w / 2, y: b.y + b.h / 2, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, life: 1, color: b.color, r: 2 + Math.random() * 2 })
+                const sp = 1 + Math.random() * 3
+                ps.push({
+                  x: b.x + b.w / 2, y: b.y + b.h / 2,
+                  vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+                  life: 1, color: b.color, size: 2 + Math.random() * 2,
+                })
               }
-              const fromSide = s.ballX < b.x || s.ballX > b.x + b.w
-              if (fromSide) s.bvx *= -1; else s.bvy *= -1
+              if (g.bx < b.x || g.bx > b.x + b.w) g.vx *= -1; else g.vy *= -1
               break
             }
           }
 
-          if (s.ballY > h + BALL_R) {
-            if (aiMode) {
-              resetBall()
-              autoLaunchTimer = 0
-            } else {
-              setLives((p) => {
-                const next = p - 1
-                if (next <= 0) { s.running = false; haptic('heavy') }
-                else { resetBall(); haptic('heavy') }
-                return next
-              })
+          if (g.by > h + BALL_R) {
+            if (ai) { resetBall(); g.aiTimer = 0 }
+            else {
+              g.lives--; setLives(g.lives)
+              if (g.lives <= 0) { g.over = true; haptic('heavy') }
+              else { resetBall(); haptic('heavy') }
             }
           }
 
-          const maxV = 8
-          s.bvx = Math.max(-maxV, Math.min(maxV, s.bvx))
-          s.bvy = Math.max(-maxV, Math.min(maxV, s.bvy))
+          g.vx = Math.max(-SPEED_MAX, Math.min(SPEED_MAX, g.vx))
+          g.vy = Math.max(-SPEED_MAX, Math.min(SPEED_MAX, g.vy))
         }
       }
 
-      // ball
-      ctx.beginPath()
-      ctx.arc(s.ballX, s.ballY, BALL_R, 0, Math.PI * 2)
-      ctx.fillStyle = '#fff'
-      ctx.fill()
+      /* ball */
+      ctx.beginPath(); ctx.arc(g.bx, g.by, BALL_R, 0, Math.PI * 2)
+      ctx.fillStyle = '#fff'; ctx.fill()
 
-      if (s.launched) {
-        ctx.beginPath()
-        ctx.arc(s.ballX, s.ballY, BALL_R * 3, 0, Math.PI * 2)
-        const g = ctx.createRadialGradient(s.ballX, s.ballY, 0, s.ballX, s.ballY, BALL_R * 3)
-        g.addColorStop(0, 'rgba(255,255,255,0.1)')
-        g.addColorStop(1, 'rgba(255,255,255,0)')
-        ctx.fillStyle = g
-        ctx.fill()
+      if (g.launched && !g.over) {
+        const gr = ctx.createRadialGradient(g.bx, g.by, 0, g.bx, g.by, BALL_R * 3)
+        gr.addColorStop(0, 'rgba(255,255,255,0.1)')
+        gr.addColorStop(1, 'rgba(255,255,255,0)')
+        ctx.beginPath(); ctx.arc(g.bx, g.by, BALL_R * 3, 0, Math.PI * 2)
+        ctx.fillStyle = gr; ctx.fill()
       }
 
-      // sparks
-      for (let i = sp.length - 1; i >= 0; i--) {
-        const p = sp[i]
+      /* particles */
+      for (let i = ps.length - 1; i >= 0; i--) {
+        const p = ps[i]
         p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life -= 0.03
-        if (p.life <= 0) { sp.splice(i, 1); continue }
-        ctx.globalAlpha = p.life
-        ctx.fillStyle = p.color
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.r * p.life, 0, Math.PI * 2)
-        ctx.fill()
+        if (p.life <= 0) { ps.splice(i, 1); continue }
+        ctx.globalAlpha = p.life; ctx.fillStyle = p.color
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill()
         ctx.globalAlpha = 1
       }
 
-      // AI mode label
-      if (aiMode) {
-        ctx.fillStyle = '#333'
-        ctx.font = '500 10px "Space Grotesk", sans-serif'
-        ctx.textAlign = 'right'
-        ctx.fillText('AI playing', w - 12, h - 6)
+      /* AI label */
+      if (ai && !g.over) {
+        ctx.fillStyle = '#333'; ctx.font = '500 10px "Space Grotesk", sans-serif'
+        ctx.textAlign = 'right'; ctx.fillText('AI playing', w - 12, h - 6)
       }
 
-      // game over overlay (human only)
-      if (!s.running && !aiMode) {
-        ctx.fillStyle = 'rgba(10,10,10,0.6)'
-        ctx.fillRect(0, 0, w, h)
-        ctx.fillStyle = accent
-        ctx.font = '700 16px "Space Grotesk", sans-serif'
-        ctx.textAlign = 'center'
-        ctx.fillText('Game Over', w / 2, h / 2 - 8)
-        ctx.fillStyle = '#666'
-        ctx.font = '500 11px "Space Grotesk", sans-serif'
-        ctx.fillText('Move cursor away and back to restart', w / 2, h / 2 + 14)
+      /* game over */
+      if (g.over && !ai) {
+        ctx.fillStyle = 'rgba(10,10,10,0.7)'; ctx.fillRect(0, 0, w, h)
+        ctx.fillStyle = ac; ctx.font = '700 16px "Space Grotesk", sans-serif'
+        ctx.textAlign = 'center'; ctx.fillText('Game Over', w / 2, h / 2 - 12)
+        ctx.fillStyle = '#888'; ctx.font = '500 11px "Space Grotesk", sans-serif'
+        ctx.fillText(touchDevice ? 'Tap to restart' : 'Click to restart', w / 2, h / 2 + 10)
+        ctx.fillStyle = '#555'; ctx.font = '600 11px "Space Grotesk", sans-serif'
+        ctx.fillText(`Score: ${g.score}`, w / 2, h / 2 + 32)
       }
 
-      rafId = requestAnimationFrame(loop)
+      raf = requestAnimationFrame(loop)
     }
 
-    rafId = requestAnimationFrame(loop)
+    raf = requestAnimationFrame(loop)
 
     return () => {
-      cancelAnimationFrame(rafId)
-      ro.disconnect()
+      cancelAnimationFrame(raf); ro.disconnect()
+      wrap.removeEventListener('pointerdown', onPointerDown)
       wrap.removeEventListener('pointermove', onPointerMove)
+      wrap.removeEventListener('pointerup', onPointerUp)
       wrap.removeEventListener('pointerenter', onPointerEnter)
       wrap.removeEventListener('pointerleave', onPointerLeave)
-      wrap.removeEventListener('touchmove', onTouch)
       wrap.removeEventListener('click', onClick)
     }
-  }, [buildBricks, resetBall, launchBall, fullReset])
+  }, [])
+
+  const hint = mode === 'human'
+    ? isTouch ? 'Tap to launch \u00B7 Drag to move' : 'Click to launch \u00B7 You\u2019re playing'
+    : isTouch ? 'Tap to take control' : 'Hover to take control from the AI'
 
   return (
     <div className="playground-wrapper">
       <div className="playground-header">
         <span className="playground-label">Skill Breaker</span>
-        {isHuman && (
+        {mode === 'human' ? (
           <span className="playground-score">
             Score: {score}
             <span className="playground-lives">
@@ -378,12 +399,14 @@ export default function SkillPlayground() {
               ))}
             </span>
           </span>
+        ) : (
+          <span className="playground-score" style={{ color: '#555' }}>AI mode</span>
         )}
       </div>
       <div className="playground-canvas-wrap" ref={wrapRef}>
         <canvas ref={canvasRef} className="playground-canvas" />
       </div>
-      <p className="playground-hint">{isHuman ? 'Click to launch \u00B7 You\u2019re playing' : 'Hover to take control from the AI'}</p>
+      <p className="playground-hint">{hint}</p>
     </div>
   )
 }
