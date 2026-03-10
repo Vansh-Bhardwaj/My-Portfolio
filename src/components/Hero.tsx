@@ -41,9 +41,8 @@ export default function Hero() {
 
       const el = nameRef.current
       if (el) {
-        el.style.letterSpacing = `${-0.04 + current * 0.15}em`
         el.style.opacity = `${1 - current * 0.7}`
-        el.style.transform = `translateY(${current * -30}px) scale(${1 + current * 0.05})`
+        el.style.transform = `translateY(${current * -30}px)`
       }
 
       rafId = requestAnimationFrame(animate)
