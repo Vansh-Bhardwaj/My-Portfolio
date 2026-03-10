@@ -238,6 +238,18 @@ button:hover .arrow-icon {
   margin-bottom: 24px;
 }
 
+.role-cycle {
+  display: inline-block;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.role-cycle.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .hero-name {
   font-size: clamp(3rem, 13vw, 16rem);
   font-weight: 700;
@@ -576,6 +588,11 @@ button:hover .arrow-icon {
   height: 7px;
   border-radius: 50%;
   background: var(--accent);
+}
+
+.playground-hi {
+  color: #555;
+  font-weight: 500;
 }
 
 .playground-canvas-wrap {

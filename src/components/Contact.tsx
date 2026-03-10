@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import { useInView } from '../hooks/useInView'
 import { haptic } from '../hooks/useHaptics'
 import CoffeeMug from './CoffeeMug'
@@ -38,6 +38,50 @@ function MagneticLink({ href, children, className = '', ...props }: React.Anchor
   )
 }
 
+function EmailLink({ email }: { email: string }) {
+  const [copied, setCopied] = useState(false)
+  const linkRef = useRef<HTMLAnchorElement>(null)
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const el = linkRef.current
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const x = e.clientX - rect.left - rect.width / 2
+    const y = e.clientY - rect.top - rect.height / 2
+    el.style.setProperty('--mx', `${x * 0.3}px`)
+    el.style.setProperty('--my', `${y * 0.3}px`)
+  }
+
+  const handleMouseLeave = () => {
+    const el = linkRef.current
+    if (!el) return
+    el.style.setProperty('--mx', '0px')
+    el.style.setProperty('--my', '0px')
+  }
+
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    haptic('light')
+    navigator.clipboard.writeText(email).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }, [email])
+
+  return (
+    <a
+      ref={linkRef}
+      href={`mailto:${email}`}
+      className="magnetic contact-link"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      onClick={handleClick}
+    >
+      {copied ? 'Copied to clipboard!' : email}
+    </a>
+  )
+}
+
 export default function Contact() {
   const { ref, isVisible } = useInView()
 
@@ -57,12 +101,7 @@ export default function Contact() {
             <CoffeeMug size={15} style={{ marginLeft: 6, opacity: 0.25 }} />
           </p>
           <div className="contact-links">
-            <MagneticLink
-              href="mailto:work.vanshbhardwaj@gmail.com"
-              className="contact-link"
-            >
-              work.vanshbhardwaj@gmail.com
-            </MagneticLink>
+            <EmailLink email="work.vanshbhardwaj@gmail.com" />
             <MagneticLink
               href="https://www.linkedin.com/in/vansh-bhardwaj-780271221/"
               target="_blank"

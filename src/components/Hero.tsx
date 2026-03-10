@@ -1,5 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { haptic } from '../hooks/useHaptics'
+
+const ROLES = [
+  'Software Developer',
+  'Creative Technologist',
+  'Game Developer',
+  'Full-stack Engineer',
+]
 
 function SplitLine({ text, baseDelay, className = '' }: { text: string; baseDelay: number; className?: string }) {
   return (
@@ -13,6 +20,28 @@ function SplitLine({ text, baseDelay, className = '' }: { text: string; baseDela
           {char}
         </span>
       ))}
+    </span>
+  )
+}
+
+function RoleCycler() {
+  const [idx, setIdx] = useState(0)
+  const [show, setShow] = useState(true)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setShow(false)
+      setTimeout(() => {
+        setIdx(i => (i + 1) % ROLES.length)
+        setShow(true)
+      }, 400)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
+
+  return (
+    <span className={`role-cycle ${show ? 'show' : ''}`}>
+      {ROLES[idx]}
     </span>
   )
 }
@@ -70,7 +99,7 @@ export default function Hero() {
   return (
     <section className="hero">
       <p className="hero-label animate-in" style={{ animationDelay: '0.8s' }}>
-        Software Developer &amp; Creative Technologist
+        <RoleCycler />
       </p>
       <h1 className="hero-name" ref={nameRef}>
         <SplitLine text="Vansh" baseDelay={1.0} />

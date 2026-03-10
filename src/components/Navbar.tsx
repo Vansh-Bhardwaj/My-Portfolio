@@ -29,7 +29,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+    <nav className={`navbar ${scrolled ? 'scrolled' : ''} animate-in`} style={{ animationDelay: '0.3s' }}>
       <a href="#" className="nav-logo" onClick={(e) => go(e, 'body')}>VB</a>
       <button
         className={`nav-toggle ${menuOpen ? 'open' : ''}`}
