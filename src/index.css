@@ -1,0 +1,81 @@
+:root {
+  --bg: #0C0C0C;
+  --bg-alt: #111111;
+  --text: #EBEBEB;
+  --text-muted: #666666;
+  --accent: #FF4D00;
+  --border: #1E1E1E;
+  --font: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --px: clamp(20px, 4vw, 48px);
+  --container: 1400px;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  /* no scroll-behavior: smooth — Lenis handles this */
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) var(--bg);
+}
+
+body {
+  font-family: var(--font);
+  background-color: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+}
+
+/* Custom Scrollbar — WebKit */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #ff6a2e;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--bg);
+}

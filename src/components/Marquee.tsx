@@ -1,0 +1,92 @@
+import { useEffect, useRef } from 'react'
+
+const roles = [
+  'Performance', 'Web Development', 'Creative Technologist',
+  'Game Dev', 'VR / AR', '3D Visualization',
+  'Product UI', 'Shaders', 'Frontend Systems',
+]
+const tech = [
+  'React', 'Next.js', 'TypeScript', 'Unity', 'C#',
+  'Cloudflare Workers', 'Blender', 'GSAP', 'Node.js', 'GLSL',
+]
+
+function MarqueeRow({ items }: { items: string[] }) {
+  return (
+    <div className="marquee-content" aria-hidden="true">
+      {items.map((item, i) => (
+        <span className="marquee-item" key={`${item}-${i}`}>
+          {item}
+          <span className="marquee-dot" />
+        </span>
+      ))}
+    </div>
+  )
+}
+
+export default function Marquee() {
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const animsRef = useRef<Animation[]>([])
+  const speedRef = useRef(1)
+  const lastScrollY = useRef(0)
+  const lastTime = useRef(Date.now())
+
+  useEffect(() => {
+    if (wrapperRef.current) {
+      const inners = wrapperRef.current.querySelectorAll('.marquee-inner')
+      const anims: Animation[] = []
+      inners.forEach((el) => {
+        el.getAnimations().forEach((a) => anims.push(a))
+      })
+      animsRef.current = anims
+    }
+
+    const handleScroll = () => {
+      const now = Date.now()
+      const dt = Math.max(now - lastTime.current, 1)
+      const dy = Math.abs(window.scrollY - lastScrollY.current)
+      const velocity = dy / dt
+
+      speedRef.current = 1 + Math.min(velocity * 3, 4)
+
+      lastScrollY.current = window.scrollY
+      lastTime.current = now
+    }
+
+    const updateRate = () => {
+      speedRef.current += (1 - speedRef.current) * 0.05
+
+      animsRef.current.forEach((anim) => {
+        anim.playbackRate = speedRef.current
+      })
+
+      requestAnimationFrame(updateRate)
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    const raf = requestAnimationFrame(updateRate)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+      cancelAnimationFrame(raf)
+    }
+  }, [])
+
+  return (
+    <div className="marquee-wrapper" ref={wrapperRef}>
+      <div className="marquee">
+        <div className="marquee-inner">
+          <MarqueeRow items={roles} />
+          <MarqueeRow items={roles} />
+          <MarqueeRow items={roles} />
+        </div>
+      </div>
+      <div className="marquee reverse">
+        <div className="marquee-inner">
+          <MarqueeRow items={tech} />
+          <MarqueeRow items={tech} />
+          <MarqueeRow items={tech} />
+        </div>
+      </div>
+    </div>
+  )
+}
